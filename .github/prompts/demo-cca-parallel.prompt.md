@@ -1,7 +1,7 @@
 ---
 mode: 'agent'
 description: 'Use Coding Agent to test multiple paths - in parallel!'
-tools: ['codebase', 'fetch', 'findTestFiles', 'githubRepo', 'openSimpleBrowser', 'problems', 'search', 'searchResults', 'usages', 'add_sub_issue', 'assign_copilot_to_issue', 'create_issue', 'get_issue', 'list_issues', 'list_sub_issues', 'search_issues', 'update_issue', 'github']
+tools: ['search', 'Azure MCP/search', 'Azure MCP Server/search', 'github-remote/*', 'usages', 'problems', 'openSimpleBrowser', 'fetch', 'githubRepo']
 ---
 
 # Demo: Use Coding Agent to test multiple paths - in parallel!
@@ -30,7 +30,7 @@ Implement a complete Cart system including:
 3. Summarize the designs in a sentence or two each.
 4. Create an Epic issue in the GitHub repository called "Cart Page Experimentation".
 5. For each design, create a separate sub-issue in the Epic issue.
-6. Assign the Copilot Agent to each sub-issue to implement the design in parallel.
+6. DO NOT assign the Copilot Agent to any issues yet until I review
 
 ### Frontend Architecture and Building
 - Refer to the existing Architecture Doc (../docs/architecture.md) for frontend structure
