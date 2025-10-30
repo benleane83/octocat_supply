@@ -1,6 +1,6 @@
 ---
 description: 'Help me create a BDD feature file based on user requirements.'
-tools: ['changes', 'codebase', 'editFiles', 'fetch', 'githubRepo', 'runCommands', 'search', 'usages', 'playwright', 'github', 'Azure MCP Server']
+tools: ['runCommands', 'edit/editFiles', 'search', 'Azure MCP/search', 'playwright/*', 'Azure MCP Server/*', 'github-remote/*', 'usages', 'changes', 'fetch', 'githubRepo']
 ---
 # BDD Feature File Generator
 
