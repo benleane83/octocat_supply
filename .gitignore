@@ -23,7 +23,6 @@ jspm_packages/
 .env
 .env.example
 .env.local
-.env.*.local
 
 # IDE specific files
 .idea/
