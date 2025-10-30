@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 import { api } from '../../../api/config';
 import { useTheme } from '../../../context/ThemeContext';
+import { useCart } from '../../../context/CartContext';
 
 interface Product {
   productId: number;
@@ -26,8 +27,10 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [addedProducts, setAddedProducts] = useState<Set<number>>(new Set());
   const { data: products, isLoading, error } = useQuery('products', fetchProducts);
   const { darkMode } = useTheme();
+  const { addToCart } = useCart();
 
   const filteredProducts = products?.filter(
     (product) =>
@@ -42,14 +45,35 @@ export default function Products() {
     }));
   };
 
-  const handleAddToCart = (productId: number) => {
-    const quantity = quantities[productId] || 0;
+  const handleAddToCart = (product: Product) => {
+    const quantity = quantities[product.productId] || 0;
     if (quantity > 0) {
-      // TODO: Implement cart functionality
-      alert(`Added ${quantity} items to cart`);
+      addToCart(
+        {
+          productId: product.productId,
+          name: product.name,
+          price: product.discount ? product.price * (1 - product.discount) : product.price,
+          imgName: product.imgName,
+          sku: product.sku,
+          unit: product.unit,
+        },
+        quantity,
+      );
+      
+      // Show confirmation feedback
+      setAddedProducts((prev) => new Set([...prev, product.productId]));
+      setTimeout(() => {
+        setAddedProducts((prev) => {
+          const next = new Set(prev);
+          next.delete(product.productId);
+          return next;
+        });
+      }, 2000);
+      
+      // Reset quantity
       setQuantities((prev) => ({
         ...prev,
-        [productId]: 0,
+        [product.productId]: 0,
       }));
     }
   };
@@ -228,7 +252,7 @@ export default function Products() {
                         </button>
                       </div>
                       <button
-                        onClick={() => handleAddToCart(product.productId)}
+                        onClick={() => handleAddToCart(product)}
                         className={`px-4 py-2 rounded-lg transition-colors ${
                           quantities[product.productId]
                             ? 'bg-primary hover:bg-accent text-white'
@@ -238,7 +262,7 @@ export default function Products() {
                         aria-label={`Add ${quantities[product.productId] || 0} ${product.name} to cart`}
                         id={`add-to-cart-${product.productId}`}
                       >
-                        Add to Cart
+                        {addedProducts.has(product.productId) ? '✓ Added!' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>
