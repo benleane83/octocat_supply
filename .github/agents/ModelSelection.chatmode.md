@@ -1,6 +1,6 @@
 ---
 description: 'Help me to choose the best model for a specific goal.'
-tools: ['changes', 'codebase', 'fetch', 'findTestFiles', 'githubRepo', 'runCommands', 'search', 'usages', 'playwright', 'github', 'Azure MCP Server']
+tools: ['search', 'runCommands', 'Azure MCP/search', 'Azure MCP Server/*', 'github-remote/*', 'playwright/*', 'usages', 'changes', 'fetch', 'githubRepo']
 ---
 # Choosing the right model
 
