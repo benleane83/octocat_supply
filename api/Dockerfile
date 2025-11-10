@@ -1,4 +1,4 @@
-FROM node:24-alpine as builder
+FROM node:25-alpine as builder
 
 WORKDIR /app
 COPY package*.json ./
@@ -6,7 +6,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM node:24-alpine
+FROM node:25-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --omit=dev
