@@ -14,9 +14,10 @@ export default function Checkout() {
   const [orderDescription, setOrderDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
-  // Redirect if cart is empty
-  if (items.length === 0) {
+  // Redirect if cart is empty (but not if order was just placed)
+  if (items.length === 0 && !isOrderPlaced) {
     navigate('/products');
     return null;
   }
@@ -45,6 +46,9 @@ export default function Checkout() {
 
       // Submit order to API
       const response = await axios.post(`${api.baseURL}${api.endpoints.orders}`, orderData);
+
+      // Mark order as placed to prevent redirect
+      setIsOrderPlaced(true);
 
       // Clear cart on success
       clearCart();
