@@ -54,7 +54,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addItem = (product: Product, quantity: number) => {
-    if (quantity <= 0) return;
+    if (quantity <= 0) {
+      console.warn('Cannot add item with invalid quantity:', quantity);
+      return;
+    }
 
     setItems((prevItems) => {
       const existingItemIndex = prevItems.findIndex((item) => item.productId === product.productId);

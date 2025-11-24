@@ -134,9 +134,9 @@ router.post('/', async (req, res, next) => {
     // Create order details if items are provided
     if (items && items.length > 0) {
       for (const item of items) {
-        if (!item.productId || !item.quantity || !item.unitPrice) {
+        if (!item.productId || item.quantity <= 0 || item.unitPrice <= 0) {
           throw new ValidationError(
-            'Each item must have productId, quantity, and unitPrice',
+            'Each item must have valid productId, quantity (>0), and unitPrice (>0)',
           );
         }
 

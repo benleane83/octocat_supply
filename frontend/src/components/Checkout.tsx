@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/config';
+
+// Default branch ID for orders (can be moved to config/environment)
+const DEFAULT_BRANCH_ID = 1;
 
 export default function Checkout() {
   const { items, clearCart, total } = useCart();
@@ -17,8 +20,13 @@ export default function Checkout() {
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   // Redirect if cart is empty (but not if order was just placed)
+  useEffect(() => {
+    if (items.length === 0 && !isOrderPlaced) {
+      navigate('/products');
+    }
+  }, [items.length, isOrderPlaced, navigate]);
+
   if (items.length === 0 && !isOrderPlaced) {
-    navigate('/products');
     return null;
   }
 
@@ -30,7 +38,7 @@ export default function Checkout() {
     try {
       // Prepare order data
       const orderData = {
-        branchId: 1, // Hardcoded default branch ID as per requirements
+        branchId: DEFAULT_BRANCH_ID,
         name: orderName,
         description: orderDescription || undefined,
         orderDate: new Date().toISOString(),
