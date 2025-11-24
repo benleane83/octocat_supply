@@ -101,16 +101,63 @@
 
 import express from 'express';
 import { Order } from '../models/order';
+import { OrderDetail } from '../models/orderDetail';
 import { getOrdersRepository } from '../repositories/ordersRepo';
-import { handleDatabaseError, NotFoundError } from '../utils/errors';
+import { getOrderDetailsRepository } from '../repositories/orderDetailsRepo';
+import { getProductsRepository } from '../repositories/productsRepo';
+import { handleDatabaseError, NotFoundError, ValidationError } from '../utils/errors';
 
 const router = express.Router();
 
-// Create a new order
+// Create a new order with order details
 router.post('/', async (req, res, next) => {
   try {
-    const repo = await getOrdersRepository();
-    const newOrder = await repo.create(req.body as Omit<Order, 'orderId'>);
+    const { items, ...orderData } = req.body;
+
+    // Validate order data
+    if (!orderData.branchId || !orderData.name) {
+      throw new ValidationError('Missing required fields: branchId and name are required');
+    }
+
+    // Validate items if provided
+    if (items && (!Array.isArray(items) || items.length === 0)) {
+      throw new ValidationError('Items must be a non-empty array');
+    }
+
+    const ordersRepo = await getOrdersRepository();
+    const orderDetailsRepo = await getOrderDetailsRepository();
+    const productsRepo = await getProductsRepository();
+
+    // Create the order
+    const newOrder = await ordersRepo.create(orderData as Omit<Order, 'orderId'>);
+
+    // Create order details if items are provided
+    if (items && items.length > 0) {
+      for (const item of items) {
+        if (!item.productId || !item.quantity || !item.unitPrice) {
+          throw new ValidationError(
+            'Each item must have productId, quantity, and unitPrice',
+          );
+        }
+
+        // Verify product exists
+        const product = await productsRepo.findById(item.productId);
+        if (!product) {
+          throw new NotFoundError('Product', item.productId);
+        }
+
+        // Create order detail
+        await orderDetailsRepo.create({
+          orderId: newOrder.orderId,
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          notes: item.notes || '',
+        });
+      }
+    }
+
+    // Return the created order
     res.status(201).json(newOrder);
   } catch (error) {
     next(error);
