@@ -5,6 +5,9 @@ import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/config';
 
+// Default branch ID for orders (as per requirements, no branch selection UI)
+const DEFAULT_BRANCH_ID = 1;
+
 export default function Checkout() {
   const { items, clearCart, getCartTotal } = useCart();
   const { darkMode } = useTheme();
@@ -39,7 +42,7 @@ export default function Checkout() {
     try {
       // Create the order
       const orderData = {
-        branchId: 1, // Hard-coded as per requirement
+        branchId: DEFAULT_BRANCH_ID,
         orderDate: new Date().toISOString(),
         name: formData.name,
         description: formData.description,
