@@ -102,7 +102,7 @@
 import express from 'express';
 import { Product } from '../models/product';
 import { getProductsRepository } from '../repositories/productsRepo';
-import { handleDatabaseError, NotFoundError } from '../utils/errors';
+import { NotFoundError } from '../utils/errors';
 
 const router = express.Router();
 

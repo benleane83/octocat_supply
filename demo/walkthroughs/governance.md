@@ -2,7 +2,7 @@
 
 ## Rulesets & Custom Properties
 
-The repository has an organization ruleset [OD OctoCAT Supply Ruleset]() applied, setting up a few of the standard rules like:
+The repository has an organization ruleset [OD OctoCAT Supply Ruleset](https://github.com/organizations/msft-common-demos/settings/rules/8702023) applied, setting up a few of the standard rules like:
 
 1. Protecting the main branch from deletions, force pushes etc.
 2. Requiring a pull-request

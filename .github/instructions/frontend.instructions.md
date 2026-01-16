@@ -1,8 +1,6 @@
-applyTo:
-  - frontend/src/**
-  - frontend/index.html
-  - frontend/vite.config.ts
-  - frontend/tailwind.config.js
+---
+description: "Guidance for editing and reviewing frontend code changes in the React + Vite + Tailwind stack."
+applyTo: "frontend/src/**, frontend/index.html, frontend/vite.config.ts, frontend/tailwind.config.js"
 ---
 # Frontend Review Guidance
 Focus on UX quality, accessibility, performance, and maintainability of the React + Vite + Tailwind stack.

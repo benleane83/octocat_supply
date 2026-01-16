@@ -28,9 +28,10 @@ param containerRegistryPassword string
 
 // Variables
 // Removing demoSlug since Container App name length must be up to 32 characters
-var demoPrefix = replace(demoInstanceName, '${demoSlug}-', '')
+var cleanedName = replace(replace(replace(demoInstanceName, '${demoSlug}-', ''), '_', '-'), '--', '-')
+var demoPrefix = substring(cleanedName, 0, min(length(cleanedName), 25))
 var apiAppName = '${demoPrefix}-api-ca'
-var frontendAppName = '${demoPrefix}-front-ca'
+var frontendAppName = '${demoPrefix}-frt-ca'
 
 // API Container App
 resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {

@@ -1,7 +1,6 @@
-applyTo:
-  - api/sql/migrations/**
-  - api/sql/seed/**
-  - api/src/db/**
+---
+description: "Guidance for editing and reviewing database schema changes in the API."
+applyTo: "database/migrations/**, database/seed/**, api/src/db/**"
 ---
 # Database & Schema Review Guidance
 Specialized guidance for SQLite schema evolution, migrations, and seed strategy.

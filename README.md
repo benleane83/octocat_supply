@@ -1,12 +1,11 @@
-
-# 🚀 OctoCAT Supply: The Ultimate GitHub Copilot Demo v2.5.2
+# 🚀 OctoCAT Supply: The Ultimate GitHub Copilot Demo v3.0.9
 
 ![OctoCAT Supply](./frontend/public/hero.png)
 
 Welcome to the OctoCAT Supply Website - your go-to demo for showcasing the incredible capabilities of GitHub Copilot, GHAS, and the power of AI-assisted development!
 
 > [!NOTE]
-> For a walkthrough of all demos, check out the [Demo Walkthroughs](./demo/walkthroughs/readme.md).
+> For a walkthrough of all demos, check out the [Demo Walkthroughs](./demo/walkthroughs/README.md).
 
 ## 🏗️ Architecture
 
@@ -26,43 +25,85 @@ erDiagram
 ### Tech Stack
 
 - **Frontend**: React 18+, TypeScript, Tailwind CSS, Vite
+
 - **Backend**: Express.js, TypeScript, SQLite, OpenAPI/Swagger
+
 - **Data**: SQLite (file db at `api/data/app.db`; in-memory for tests)
 - **DevOps**: Docker
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+
+
+- Node.js 18+ and npm
+
+- Make
+
+### Quick Start
+
 1. Clone this repository
-2. Build the projects:
+
+2. Install dependencies:
 
    ```bash
-   # Build API and Frontend
-   npm install && npm run build
+   make install
    ```
 
-3. Start the application:
+3. Start the development environment:
 
    ```bash
-   npm run dev
+   make dev
    ```
 
-Optional: initialize the database explicitly (migrations + seed):
+This will start both the API server (on port 3000) and the frontend development server (on port 5173).
+
+### Available Make Commands
+
+View all available commands:
 
 ```bash
-npm run db:init --workspace=api
+make help
 ```
 
-Handy DB scripts (API workspace):
+Key commands:
+
+- `make dev` - Start both API and frontend development servers
+- `make dev-api` - Start only the API server
+- `make dev-frontend` - Start only the frontend server
+- `make build` - Build both API and frontend for production
+- `make db-init` - Initialize database schema
+- `make db-seed` - Seed database with sample data
+- `make test` - Run all tests
+- `make clean` - Clean build artifacts and dependencies
+
+### Database Management
+
+Initialize the database explicitly (migrations + seed):
 
 ```bash
-# Run migrations only
-npm run db:migrate --workspace=api
-
-# Seed data only
-npm run db:seed --workspace=api
+make db-init
 ```
 
-Or use the VS Code tasks:
+Seed data only:
+
+```bash
+make db-seed
+```
+
+
+Or use npm scripts directly in the API directory:
+
+```bash
+cd api && npm run db:migrate  # Run migrations only
+cd api && npm run db:seed     # Seed data only
+```
+
+
+### VS Code Integration
+
+You can also use VS Code tasks and launch configurations:
 
 - `Cmd/Ctrl + Shift + P` -> `Run Task` -> `Build All`
 - Use the Debug panel to run `Start API & Frontend`
@@ -81,7 +122,7 @@ To showcase extended capabilities:
 
 - [Detailed Architecture](./docs/architecture.md)
 - [SQLite Integration](./docs/sqlite-integration.md)
-- [Complete Demo Script](./docs/demo-script.md)
+- [Complete Demo Script](./demo/walkthroughs/README.md)
 
 Database defaults and env vars:
 

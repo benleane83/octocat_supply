@@ -10,7 +10,7 @@ export class DatabaseSeeder {
   private db: DatabaseConnection;
   private seedsDir: string;
 
-  constructor(db: DatabaseConnection, seedsDir: string = './sql/seed') {
+  constructor(db: DatabaseConnection, seedsDir: string = './database/seed') {
     this.db = db;
     this.seedsDir = path.resolve(seedsDir);
   }
@@ -25,7 +25,7 @@ export class DatabaseSeeder {
         'SELECT COUNT(*) as count FROM suppliers',
       );
       return (result?.count || 0) > 0;
-    } catch (error) {
+    } catch {
       // If table doesn't exist, database is not seeded
       return false;
     }
@@ -147,7 +147,7 @@ export class DatabaseSeeder {
  */
 export async function seedDatabase(force: boolean = false, isTest: boolean = false): Promise<void> {
   const db = await getDatabase(isTest);
-  const seedsDir = path.join(__dirname, '../../sql/seed');
+  const seedsDir = path.join(__dirname, '../../database/seed');
   const seeder = new DatabaseSeeder(db, seedsDir);
 
   await seeder.seedDatabase(force);
@@ -158,7 +158,7 @@ export async function seedDatabase(force: boolean = false, isTest: boolean = fal
  */
 export async function reseedDatabase(isTest: boolean = false): Promise<void> {
   const db = await getDatabase(isTest);
-  const seedsDir = path.join(__dirname, '../../sql/seed');
+  const seedsDir = path.join(__dirname, '../../database/seed');
   const seeder = new DatabaseSeeder(db, seedsDir);
 
   await seeder.clearDatabase();

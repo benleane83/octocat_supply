@@ -1,19 +1,21 @@
-applyTo:
-  - api/src/**/*.ts
-  - api/package.json
-  - api/sql/migrations/**
-  - api/sql/seed/**
-  - api/api-swagger.json
+---
+description: "Guidance for editing and reviewing API code changes in the API."
+applyTo: "api/src/**/*.ts, api/src/**/*.py, api/package.json, api/pyproject.toml, database/migrations/**, database/seed/**, api/api-swagger.json"
 ---
 # API Review Guidance
+
 Focus on correctness, security, data integrity, and consistency in the Express + SQLite repository layer.
 
+
 ## API Principles
+
 - Keep controllers (routes) thin: validation + orchestration; move logic to repositories/services.
 - Use parameterized SQL always; never build raw query strings with user input.
 - Return proper HTTP status codes via shared error classes (NotFound, Validation, Conflict).
+
 - Preserve consistent naming: camelCase in TypeScript models, snake_case in SQL columns with reliable mapping.
-- Document changes: update Swagger spec when adding/modifying endpoints.
+
+- Always use Swagger Documentation served as comments at the top of our route files. Update the spec when adding/modifying endpoints.
 
 ## Review Checklist
 1. Input validation: basic type/shape checks before hitting DB; reject ambiguous/partial updates.
@@ -30,7 +32,9 @@ Focus on correctness, security, data integrity, and consistency in the Express +
 
 ## Testing Guidance
 - Add unit tests for new repository methods (happy path + error cases) using in-memory DB.
+
 - For route additions, integration test hitting the real Express app (e.g., supertest) verifying status + response shape.
+
 
 ## Security Considerations
 - Sanitize / constrain pagination (max limits) to avoid table scans.

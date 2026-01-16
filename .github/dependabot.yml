@@ -64,6 +64,7 @@ updates:
       - "dependencies"
       - "backend"
       - "docker"
+      - "{{ demo_options.backend }}"
     groups:
       all-docker:
         patterns:

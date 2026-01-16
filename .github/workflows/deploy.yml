@@ -1,4 +1,4 @@
-name: Deploy to Azure
+name: 🚢 Deploy to Azure
 
 on:
   workflow_dispatch:
@@ -15,10 +15,12 @@ on:
 permissions:
   id-token: write
   contents: read
+  attestations: read
+  packages: read
 
 env:
   RESOURCE_GROUP_NAME: ${{ vars.AZURE_RESOURCE_GROUP_NAME }}
-  DEMO_INSTANCE_NAME: octocat_supply-vigilant-robot
+  DEMO_INSTANCE_NAME: octocat_supply-cautious-octo-train
   DEMO_SLUG: octocat_supply
   REGISTRY_URL: "ghcr.io"
   CONTAINER_APP_ENVIRONMENT_NAME: octocat-supply-cae

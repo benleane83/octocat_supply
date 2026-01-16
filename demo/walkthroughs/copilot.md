@@ -2,24 +2,42 @@
 
 This demo app can be used to show a number of Copilot features:
 
-- **General Copilot Features:**
-  - **Unit Testing**: [Run and generate unit tests](#demo-enhancing-unit-tests-and-coverage) to improve coverage
-  - **Agent Mode and Vision**: [Generate Cart functionality](#demo-using-vision-and-agent-to-generate-cart-functionality) with natural language prompts and images
-- **Customizations**:
-  - **Custom Instructions**: [Personalize Copilot responses](#demo-custom-instructions-and-repository-configuration) for internal frameworks and coding standards
-  - **Custom Prompts**: [Reusable workflows](#demo-custom-prompt-files-and-reusable-workflows) and [session management](#demo-using-handoff-custom-prompt-for-session-management)
-- **MCP Servers**:
-  - [Generate `.feature` files and use Playwright](#demo-mcp-servers---playwright) for browser testing
-  - [Interact with GitHub](#demo-mcp-servers---github) via the GitHub MCP server
-- **Security**:
-  - [Analyze security vulnerabilities](#demo-copilot-and-application-security) and generate fixes
-- **CI/CD:**
-  - **Actions**: [Generate Actions workflows](#demo-automating-deployment-with-github-actions-azure-and-bicep) for deploy/publish
-  - **Infrastructure as Code**: [Generate Bicep or Terraform files](#demo-automating-deployment-with-github-actions-azure-and-bicep) for publishing
-- **Copilot Coding Agent**:
-  - [Hand off work to Copilot Coding Agent](#demo-using-handoff-to-copilot-coding-agent-custom-prompt-for-async-session-continuation) for async implementation
-  - [Experiment in parallel](#demo-using-copilot-coding-agent-to-experiment-in-parallel) with multiple variations
-  - [Self-healing DevOps](#demo-self-healing-devops) for failing workflows
+- [**GitHub Copilot Agent Mode \& MCP Demo**](#github-copilot-agent-mode--mcp-demo)
+  - [General Copilot Features](#general-copilot-features)
+    - [Demo: Enhancing Unit Tests and Coverage](#demo-enhancing-unit-tests-and-coverage)
+      - [Option 1: Using Coding Agent](#option-1-using-coding-agent)
+      - [Option 2: Live Coding](#option-2-live-coding)
+    - [Demo: Using Vision and Agent to Generate Cart Functionality](#demo-using-vision-and-agent-to-generate-cart-functionality)
+      - [Approach 1 - Custom Prompt (Recommended for demos)](#approach-1---custom-prompt-recommended-for-demos)
+      - [Approach 2 - Manual Chat (For deeper explanation)](#approach-2---manual-chat-for-deeper-explanation)
+  - [Customizations](#customizations)
+    - [Demo: Custom Prompt Files and Reusable Workflows](#demo-custom-prompt-files-and-reusable-workflows)
+    - [Demo: Custom Instructions and Repository Configuration](#demo-custom-instructions-and-repository-configuration)
+  - [MCP Servers](#mcp-servers)
+    - [**MCP Server install and config**](#mcp-server-install-and-config)
+      - [Start the Playwright MCP Server](#start-the-playwright-mcp-server)
+      - [Start the GitHub MCP Server](#start-the-github-mcp-server)
+    - [Demo: MCP Servers - Playwright](#demo-mcp-servers---playwright)
+    - [Demo: MCP Servers - GitHub](#demo-mcp-servers---github)
+  - [Security](#security)
+    - [Demo: Copilot and Application Security](#demo-copilot-and-application-security)
+  - [CI/CD](#cicd)
+    - [Demo: Automating Deployment with GitHub Actions, Azure and Bicep](#demo-automating-deployment-with-github-actions-azure-and-bicep)
+  - [Copilot Coding Agent](#copilot-coding-agent)
+    - [Demo: Using `/handoff` Custom Prompt for Session Management](#demo-using-handoff-custom-prompt-for-session-management)
+    - [Demo: Using `/handoff-to-copilot-coding-agent` Custom Prompt for Async Session Continuation](#demo-using-handoff-to-copilot-coding-agent-custom-prompt-for-async-session-continuation)
+    - [Demo: Using Copilot to help you help Copilot (inception)](#demo-using-copilot-to-help-you-help-copilot-inception)
+    - [Demo: Using Copilot Coding Agent to Experiment in Parallel](#demo-using-copilot-coding-agent-to-experiment-in-parallel)
+    - [Demo: Self-healing DevOps](#demo-self-healing-devops)
+  - [Copilot Spaces](#copilot-spaces)
+    - [Demo: Compliance Space Demos](#demo-compliance-space-demos)
+      - [Compliance Space Demo 1: General Copilot Spaces Questions](#compliance-space-demo-1-general-copilot-spaces-questions)
+      - [Compliance Space Demo 2: Combine a space and codebase for compliance assessment](#compliance-space-demo-2-combine-a-space-and-codebase-for-compliance-assessment)
+      - [Compliance Space Demo 3: Use Spaces MCP to check specific code for compliance](#compliance-space-demo-3-use-spaces-mcp-to-check-specific-code-for-compliance)
+        - [Enabling Spaces Tools in MCP](#enabling-spaces-tools-in-mcp)
+  - [TDD Agent Mode](#tdd-agent-mode)
+    - [Demo: TDD Workflow with Agent Handoffs](#demo-tdd-workflow-with-agent-handoffs)
+  - [Summary: Key Takeaways for Customers](#summary-key-takeaways-for-customers)
 
 > Note: For the most basic "What can Copilot do?" scenario, use the `demo-unit-test-coverage` prompt to have Agent Mode add some unit tests.
 
@@ -36,7 +54,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 - **What to show:** Copilot generating multiple tests, executing them, analyzing coverage and self-healing, plus demonstrate efficient use of custom prompts for testing workflows.
 - **Why:** Show Copilot's ability to quickly and easily generate tests, validate them, self-heal and analyze coverage. Also demonstrate how custom prompts can standardize testing practices.
 - **Approach 1 - Custom Prompt (Recommended for demos):**
-  1. Open the [demo-unit-test-coverage.prompt.md](../.github/prompts/demo-unit-test-coverage.prompt.md) file
+  1. Open the [demo-unit-test-coverage.prompt.md](../../.github/prompts/demo-unit-test-coverage.prompt.md) file
   2. Show the prompt structure: pre-configured for Agent mode, comprehensive tool list, detailed testing requirements
   3. Explain how it includes specific coverage requirements, CRUD operations, error handling, etc.
   4. Click "Run" to execute the automated test generation
@@ -62,7 +80,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 
 #### Approach 1 - Custom Prompt (Recommended for demos)
 
-  1. Open the [demo-cart-page.prompt.md](../.github/prompts/demo-cart-page.prompt.md) file
+  1. Open the [demo-cart-page.prompt.md](../../.github/prompts/demo-cart-page.prompt.md) file
   2. Show the prompt structure: mode: 'agent', comprehensive tool list, detailed context about the current state
   3. Attach the [cart image](../docs/design/cart.png) to the prompt
   4. Click "Run" to execute the entire cart implementation automatically
@@ -101,7 +119,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 - **What to show:** Reusing custom prompts to streamline AI-native workflow and demonstrate prompt engineering best practices
 - **Why:** Demonstrate how Copilot and VSCode use custom prompts to help streamline AI-native workflows, keep developers in the flow, and provide consistent, repeatable results.
 - **How:**  
-  1. **Model Comparison Prompt**: Show the [model-compare.prompt.md](../.github/prompts/model-compare.prompt.md) file in the prompts directory. Explain the YAML frontmatter (mode: 'agent', description, tools). Click the Run button in the top (or use Command Palette → "Prompts: Run Prompt") and show how it automatically selects Agent mode, fetches live documentation, and updates the comparison markdown file.
+  1. **Model Comparison Prompt**: Show the [model-compare.prompt.md](../../.github/prompts/model-compare.prompt.md) file in the prompts directory. Explain the YAML frontmatter (mode: 'agent', description, tools). Click the Run button in the top (or use Command Palette → "Prompts: Run Prompt") and show how it automatically selects Agent mode, fetches live documentation, and updates the comparison markdown file.
   2. **Quick Demo Prompts**: Show the available demo prompts in the `.github/prompts/` directory:
      - `demo-cart-page.prompt.md` - Complete cart implementation with vision
      - `demo-unit-test-coverage.prompt.md` - Automated test generation and coverage analysis
@@ -114,7 +132,7 @@ If you want to demo Copilot Coding Agent, there is an Issue for improving Code C
 - **What to show:** Copilot's **Custom Instructions** feature using the existing `.github/copilot-instructions.md` configuration.
 - **Why:** Demonstrate that Copilot can be customized and personalized for internal libraries, coding standards, and team practices that don't exist in the foundational models.
 - **How:**  
-  1. Show the existing [.github/copilot-instructions.md](../.github/copilot-instructions.md) file in the repository
+  1. Show the existing [.github/copilot-instructions.md](../../.github/copilot-instructions.md) file in the repository
   2. Explain how this file provides context about:
      - Repository information (owner, repo name)
      - Architecture references
@@ -241,7 +259,7 @@ You can also use the Command Palette to start the MCP servers.
   2. Enter `I want to add Personal Profile page to the app that shows the user profile and their purchases.`
   3. Show the output and ask Copilot to change something in the plan: for example, remove the `purchases` part
   4. **Explain the Context Problem**: Currently the entire conversation is in the context, which over time grows long and can consume too much of the context window. Custom prompts can solve this by creating clean handoffs.
-  5. **Show the Custom Prompt**: Open the [handoff.prompt.md](../.github/prompts/handoff.prompt.md) file in the prompts directory. Point out:
+  5. **Show the Custom Prompt**: Open the [handoff.prompt.md](../../.github/prompts/handoff.prompt.md) file in the prompts directory. Point out:
      - The YAML frontmatter configuring it as an Agent mode prompt
      - The internal thinking process in HTML comments (not shown to user)
      - The structured template for consistent handoffs
@@ -270,7 +288,7 @@ You can also use the Command Palette to start the MCP servers.
   3. Enter `I want to add Personal Profile page to the app that shows the user profile and their purchases.`
   4. Show the output and ask Copilot to change something in the plan: for example, remove the `purchases` part
   5. **Explain Time Constraints**: We have a detailed plan now, Copilot Agent can follow it and implement the desired feature, however, in order to use our time efficiently we can hand off the implementation to the Copilot Agent, allowing us to focus on other tasks (or showing other copilot features in this demo).
-  6. **Show the Custom Prompt**: Open the [handoff-to-copilot-coding-agent.prompt.md](../.github/prompts/handoff-to-copilot-coding-agent.prompt.md) file in the prompts directory. Point out:
+  6. **Show the Custom Prompt**: Open the [handoff-to-copilot-coding-agent.prompt.md](../../.github/prompts/handoff-to-copilot-coding-agent.prompt.md) file in the prompts directory. Point out:
      - The YAML frontmatter configuring it as an Agent mode prompt
      - The internal thinking process in HTML comments (not shown to user)
      - The structured issue template for consistent handoffs
@@ -327,6 +345,187 @@ You can also use the Command Palette to start the MCP servers.
   8. Copilot Coding Agent will create the PR to fix the issue by reverting the line that broke the test
   9. **Note**: This whole workflow takes a few minutes, so if you're going to show this, you may want to run this before your demo.
   10. The [failed-run-analyze.prompt.yml](.github/models/failed-run-analyze.prompt.yml) file contains the prompt used in the workflow to analyze the build failure. You can open this in the Models tab in the repo, but it requires MCP so you won't be able to test it fully in Models.
+
+## Copilot Spaces
+
+### Demo: Compliance Space Demos
+
+The Copilot Spaces demo revolves around the `OD OctoCAT Supply Compliance Docs` space, which is fed by a repository of the same name: `od-octocat-supply-compliance-docs`. You can find both in the organization of your demo repository.
+
+> [!IMPORTANT]
+> **Do not change the Space or Repo!:** Both are static resources shared by all demos in your demo environment. Please do not change or modify them, as this will impact other demos.
+
+The space and its documents are designed to be a realistic example of the legal, security, and compliance-related rules and guidelines that a software development team in an enterprise must follow.
+
+There are several demos included that you can perform individually or in the sequence presented here.
+
+> [!NOTE]
+> **A note on model choice:** The choice of model makes a significant difference in the structure and length of the answers:
+>
+> - `GPT-4` is extremely chatty and goes into detail. This is good if the purpose of the prompt is to feed information back to an AI assistant (e.g., for issue generation or coding) to provide all relevant context, but it's less ideal for a human to read through.
+> - `Gemini 1.5 Pro` on the other hand is much more concise and to the point, which is often preferable for humans.
+> - `Claude 3 Sonnet` is somewhere in between, but also tends to be more concise.
+>
+> Feel free to experiment with other models as well.
+
+#### Compliance Space Demo 1: General Copilot Spaces Questions
+
+1. Navigate to `/copilot/spaces` and, in the Organization Tab, find the `OD OctoCAT Supply Compliance Docs` space.
+2. Highlight the sophisticated instructions used to tune Copilot's behavior for compliance questions. You can also show the contents and repository, making it clear that compliance docs are often long and complex.
+3. Ask the following question (the `Gemini 1.5 Pro` model is recommended):
+
+    ```txt
+    I need to implement a cookie banner. What do I need to keep in mind from a compliance perspective?
+    ```
+
+4. Showcase how Copilot is able to extract relevant information from the compliance docs and provide a comprehensive answer, as well as cite its sources for further investigation.
+
+#### Compliance Space Demo 2: Combine a space and codebase for compliance assessment
+
+1. Navigate to `/copilot/` (Note: not `/copilot/spaces`).
+2. Attach both the Copilot Space `OD OctoCAT Supply Compliance Docs` and your demo repository as additional context.
+3. Prompt using `GPT-4` (very chatty) or `Gemini 1.5 Pro` (more concise):
+
+    ```txt
+    Please assess my repository's readiness in terms of compliance before we can ship it.
+    What gaps are still there that we need to fill before we can release our webshop?
+
+    Be thorough, please analyze the existing PRs and Issues to see what we've already covered - and list what we still need to implement.
+    ```
+
+4. Showcase how it will yield a comprehensive compliance assessment of the codebase, referencing specific files and PRs, while also generating a list of things that need to be done to make the codebase compliant before general availability (GA).
+5. Prompt again:
+
+    ```txt
+    Okay, can you help me group all those required steps a bit better and make it more concise?
+
+    Generate a list of actionable items to tackle, group them into phases, and prioritize them. What is a blocker for GA (Phase 0), what is required soon after GA (Phase 1), and what can we leave for later (Phase 2)?
+    ```
+
+6. Showcase how Copilot will again use the space's information to prioritize and group the compliance tasks into actionable phases.
+7. Lastly, prompt it to draft a sophisticated list of parent and sub-issues for all these tasks:
+
+    ```txt
+    Now please generate issues for me.
+
+    Create one parent issue as an Epic titled "Become Compliant", then add all the other tasks as sub-issues with all the details. Mark them clearly for the different phases.
+    ```
+
+8. It is up to you to generate those issues and then start assigning them to Copilot Coding Agent for implementation.
+
+#### Compliance Space Demo 3: Use Spaces MCP to check specific code for compliance
+
+> [!IMPORTANT]
+> Only the GitHub Remote MCP currently has the Copilot Spaces tools available. Also, as they are not part of the default toolset, you'll have to specifically configure them. If you don't have it working, follow the [instructions below](#enabling-spaces-tools-in-mcp). In the delivered Codespace, this is already configured as `github-remote`.
+
+Demo walkthrough steps:
+
+1. Check out the repository and ensure you have the `github-remote` MCP server running.
+2. Check out the `feature-add-tos-download` branch.
+3. Open Copilot Chat and switch to `Agent` mode, using the `GPT-4` or `Gemini 1.5 Pro` model.
+4. Enter the following prompt:
+
+    ```txt
+    Get the contents of the Copilot Space `OD OctoCAT Supply Compliance Docs`. Once you have those, please analyze my current changes in the PR: Did we include all the necessary languages for the Terms of Service download?
+    ```
+
+5. Additional prompts at your disposal:
+
+    ```txt
+    Check if we have all the necessary legal disclaimers included in our Privacy Policy update.
+    ```
+
+    ```txt
+    We need to implement a Cookie Banner. Implement it according to the compliance requirements we have in our Copilot Space `OD OctoCAT Supply Compliance Docs`.
+    ```
+
+##### Enabling Spaces Tools in MCP
+
+The Copilot Spaces Tools are **not** enabled in the default toolset of the GitHub Remote MCP Server. To enable them, you have to use the `X-MCP-Toolsets: copilot_spaces` header in your `.vscode/mcp.json` file. As you might want to combine it with other tools, here is an example config:
+
+```json
+"github-remote": {
+  "type": "http",
+  "url": "https://api.githubcopilot.com/mcp/",
+  "headers": {
+    "X-MCP-Toolsets": "actions, code_security, dependabot, discussions, issues, orgs, projects, pull_requests, repos, secret_protection, security_advisories, copilot, copilot_spaces"
+  }
+},
+```
+
+You could also just configure a dedicated MCP server entry for Copilot Spaces only, if you want to keep things separate:
+
+```json
+"github-copilot-spaces": {
+  "type": "http",
+  "url": "https://api.githubcopilot.com/mcp/",
+  "headers": {
+    "X-MCP-Toolsets": "copilot_spaces"
+  }
+},
+```
+
+For a full documentation, refer to the [github/github-mcp-server documentation](https://github.com/github/github-mcp-server/blob/main/docs/remote-server.md?tab=readme-ov-file#additional-remote-server-toolsets).
+
+## TDD Agent Mode
+
+### Demo: TDD Workflow with Agent Handoffs
+
+- **What to show:** Complete Test-Driven Development workflow using specialized agent modes with automatic handoffs between planning, test writing, and implementation phases.
+- **Why:** Demonstrate how custom agent modes can orchestrate complex multi-phase workflows, maintain state between phases, and enforce software engineering best practices like TDD automatically.
+- **How:**
+
+  1. **Planning Phase:**
+     - Open Copilot Chat and select `tdd-planner` from the Chat Modes dropdown
+     - Enter the prompt: `I want a new method that gets the orders for a branch ID`
+     - Show how the planner agent:
+       - Researches the codebase to understand existing patterns
+       - Creates a comprehensive TDD plan document in `docs/tdd-plans/`
+       - Defines test specifications with Given-When-Then format
+       - Documents acceptance criteria and edge cases
+       - Identifies files to create/modify
+     - Review the generated markdown file showing the complete plan
+
+  2. **Red Phase (Failing Tests):**
+     - Click the **"Write Red Tests"** button that appears in the plan document
+     - This automatically switches to `tdd-red` mode and hands off the plan
+     - Show how the Red agent:
+       - Reads the TDD plan for test specifications
+       - Creates comprehensive test files following the plan
+       - Runs tests to verify they fail correctly (expected behavior)
+       - Reports test failure reasons
+     - Review the generated test file (e.g., `api/src/routes/order.test.ts`)
+     - Show the test output confirming all tests fail with HTTP 404 (route not implemented)
+
+  3. **Green Phase (Minimal Implementation):**
+     - Click the **"Write Green Implementation"** button from the test results
+     - This automatically switches to `tdd-green` mode and hands off context
+     - Show how the Green agent:
+       - Analyzes failing tests to understand requirements
+       - Implements minimal code to make tests pass
+       - Adds appropriate Swagger documentation
+       - Runs tests to verify they now pass
+       - Reports success with implementation summary
+     - Review the implementation (e.g., new route in `api/src/routes/order.ts`)
+     - Show all tests passing with green checkmarks ✅
+
+  4. **Key Points to Highlight:**
+     - **Automatic Context Handoffs**: Each phase automatically passes the right context to the next
+     - **Enforced Best Practices**: TDD workflow is enforced by the agent modes
+     - **Minimal Implementation**: Green agent only writes code required by tests (no over-engineering)
+     - **Self-Verification**: Each phase validates its work (tests run automatically)
+     - **Documentation**: Complete audit trail in the TDD plan document
+     - **Code Quality**: Follows existing patterns and conventions automatically
+
+  5. **(Optional) Show the Agent Configuration:**
+     - Open `.github/copilot-modes.json` to show the three TDD agents:
+       - `tdd-planner`: Creates comprehensive test plans with research
+       - `tdd-red`: Writes failing tests following the plan
+       - `tdd-green`: Implements minimal code to pass tests
+     - Highlight how each mode has specific instructions and constraints
+     - Show how modes can be chained together for complete workflows
+
+- **Key Takeaway**: Custom agent modes enable sophisticated, multi-phase workflows that enforce best practices while maintaining context across handoffs. This creates a consistent, repeatable process that teams can rely on for quality software delivery.
 
 ## Summary: Key Takeaways for Customers
 

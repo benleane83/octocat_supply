@@ -1,171 +1,228 @@
-name: CI - Build and Test
+name: 🧪 CI - Build, Test and Lint
 
 on:
   push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  backend:
+    name: Backend - Build, Test and Lint
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [22, 24]
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v5
+    - name: Setup Node.js 24
+      uses: actions/setup-node@v6
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 24
         cache: 'npm'
+        cache-dependency-path: api/package-lock.json
         
     - name: Install dependencies
+      working-directory: api
       run: npm ci
       
-    - name: Lint Frontend
+    - name: Lint API
+      id: lint
+      if: always()
+      working-directory: api
       run: npm run lint
       
-    - name: Build All Components
+    - name: Build API
+      id: build
+      if: always()
+      working-directory: api
       run: npm run build
       
     - name: Run API Tests with Coverage
-      run: npm run test:coverage --workspace=api
-      
-    - name: Generate Coverage Badge
-      id: coverage
-      run: |
-        # Check if coverage file exists, if not set default values
-        if [ -f "api/coverage/coverage-summary.json" ]; then
-          COVERAGE=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.pct // 0')
-        else
-          echo "⚠️ Coverage summary not found, checking for coverage files..."
-          ls -la api/coverage/ || echo "No coverage directory found"
-          COVERAGE="0"
-        fi
-        
-        echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
-        
-        # Create coverage badge color based on percentage
-        if (( $(echo "$COVERAGE >= 80" | bc -l) )); then
-          echo "color=brightgreen" >> $GITHUB_OUTPUT
-        elif (( $(echo "$COVERAGE >= 60" | bc -l) )); then
-          echo "color=yellow" >> $GITHUB_OUTPUT
-        else
-          echo "color=red" >> $GITHUB_OUTPUT
-        fi
-        
+      id: tests
+      if: always()
+      working-directory: api
+      run: npm run test:coverage
+
     - name: Upload Coverage Reports
-      uses: actions/upload-artifact@v4
+      if: always()
+      uses: actions/upload-artifact@v5
       with:
-        name: coverage-reports-node-${{ matrix.node-version }}
+        name: coverage-reports-backend
         path: |
           api/coverage/
         retention-days: 30
+        if-no-files-found: ignore
+
+  frontend:
+    name: Frontend - Build and Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      
+    - name: Setup Node.js 24
+      uses: actions/setup-node@v6
+      with:
+        node-version: 24
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm ci
+      
+    - name: Lint Frontend
+      id: lint
+      if: always()
+      working-directory: frontend
+      run: npm run lint
+      
+    - name: Build Frontend
+      id: build
+      if: always()
+      working-directory: frontend
+      run: npm run build
+
+  report:
+    name: Generate Report
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: always()
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Download Coverage Reports
+      uses: actions/download-artifact@v5
+      with:
+        name: coverage-reports-backend
+        path: api/coverage/
+      continue-on-error: true
+
         
-    - name: Generate Test Summary
-      if: matrix.node-version == '20'  # Only run once
-      run: |
-        # Start the summary
-        echo "# 🚀 OctoCAT Supply Chain - Build & Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 📊 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "![Coverage](https://img.shields.io/badge/Coverage-${{ steps.coverage.outputs.coverage }}%25-${{ steps.coverage.outputs.color }})" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        # Add coverage table if available
-        if [ -f "api/coverage/coverage-summary.json" ]; then
-          echo "### 📈 Coverage Breakdown" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Coverage | Covered | Total |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|----------|---------|-------|" >> $GITHUB_STEP_SUMMARY
-          
-          # Extract coverage data and format as table
-          LINES_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.pct // "0"')
-          LINES_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.covered // "0"')
-          LINES_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.lines.total // "0"')
-          
-          STATEMENTS_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.pct // "0"')
-          STATEMENTS_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.covered // "0"')
-          STATEMENTS_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.statements.total // "0"')
-          
-          FUNCTIONS_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.pct // "0"')
-          FUNCTIONS_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.covered // "0"')
-          FUNCTIONS_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.functions.total // "0"')
-          
-          BRANCHES_PCT=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.pct // "0"')
-          BRANCHES_COVERED=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.covered // "0"')
-          BRANCHES_TOTAL=$(cat api/coverage/coverage-summary.json | jq -r '.total.branches.total // "0"')
-          
-          echo "| 📝 Lines | ${LINES_PCT}% | ${LINES_COVERED} | ${LINES_TOTAL} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📋 Statements | ${STATEMENTS_PCT}% | ${STATEMENTS_COVERED} | ${STATEMENTS_TOTAL} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔧 Functions | ${FUNCTIONS_PCT}% | ${FUNCTIONS_COVERED} | ${FUNCTIONS_TOTAL} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🌳 Branches | ${BRANCHES_PCT}% | ${BRANCHES_COVERED} | ${BRANCHES_TOTAL} |" >> $GITHUB_STEP_SUMMARY
-          
-        else
-          echo "### ⚠️ Coverage Details" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Coverage summary not available - ensure tests are running with coverage enabled" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 🏗️ Build Status" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
-        echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
-        echo "| API | ✅ Built successfully |" >> $GITHUB_STEP_SUMMARY
-        echo "| Frontend | ✅ Built successfully |" >> $GITHUB_STEP_SUMMARY
-        echo "| Linting | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 🧪 Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **API Tests**: All tests passed with ${{ steps.coverage.outputs.coverage }}% coverage" >> $GITHUB_STEP_SUMMARY
-        echo "- **Node.js Versions**: Tested on Node.js 20 & 22" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## 📁 Project Structure" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- **API**: TypeScript Express.js REST API with Swagger documentation" >> $GITHUB_STEP_SUMMARY
-        echo "- **Frontend**: React 18+ with TypeScript, Vite, and Tailwind CSS" >> $GITHUB_STEP_SUMMARY
-        echo "- **Testing**: Vitest with coverage reporting" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "---" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Built with ❤️ using GitHub Copilot 🤖" >> $GITHUB_STEP_SUMMARY
-        
-    - name: Comment Coverage on PR
-      if: github.event_name == 'pull_request' && matrix.node-version == '20'
+    - name: Generate Reports and Comment
+      if: always()
       uses: actions/github-script@v8
       with:
         script: |
-          const coverage = '${{ steps.coverage.outputs.coverage }}';
-          const color = '${{ steps.coverage.outputs.color }}';
-          const coverageBadge = `![Coverage](https://img.shields.io/badge/Coverage-${coverage}%25-${color})`;
+          const fs = require('fs');
+          const path = require('path');
           
-          const comment = `## 📊 Test Coverage Report
+          // Get job results
+          const backendResult = '${{ needs.backend.result }}';
+          const frontendResult = '${{ needs.frontend.result }}';
           
-          ${coverageBadge}
+          const backendSuccess = backendResult === 'success';
+          const frontendSuccess = frontendResult === 'success';
           
-          **Coverage**: ${coverage}%
+          // Check for coverage data
+          let coverage = 0;
+          let coverageAvailable = false;
+          let coverageData = null;
           
-          ### Summary
-          - ✅ All builds completed successfully
-          - ✅ All tests passed
-          - ✅ Code coverage: ${coverage}%
+          try {
+            const coveragePath = 'api/coverage/coverage-summary.json';
+            if (fs.existsSync(coveragePath)) {
+              coverageData = JSON.parse(fs.readFileSync(coveragePath, 'utf8'));
+              coverage = coverageData.total.lines.pct || 0;
+              coverageAvailable = true;
+            }
+          } catch (error) {
+            console.log('Coverage file not found or invalid:', error.message);
+          }
           
-          <details>
-          <summary>📁 View detailed coverage report</summary>
+          // Determine coverage badge color
+          let coverageColor = 'red';
+          if (coverage >= 80) coverageColor = 'brightgreen';
+          else if (coverage >= 60) coverageColor = 'yellow';
           
-          Coverage artifacts are available in the workflow run.
+          // Generate unified markdown report
+          function generateReport(title = '# 🚀 OctoCAT Supply Chain - Build & Test Results') {
+            let report = `${title}\n\n`;
+            
+            // Build status table
+            report += `| Component | Status |\n`;
+            report += `|-----------|--------|\n`;
+            report += `| Backend | ${backendSuccess ? '✅ Passed' : '❌ Failed'} |\n`;
+            report += `| Frontend | ${frontendSuccess ? '✅ Passed' : '❌ Failed'} |\n\n`;
+            
+            // Coverage section
+            if (coverageAvailable) {
+              report += `### 📊 Test Coverage\n\n`;
+              report += `![Coverage](https://img.shields.io/badge/Coverage-${coverage}%25-${coverageColor})\n\n`;
+              
+              if (coverageData) {
+                report += `| Metric | Coverage | Covered | Total |\n`;
+                report += `|--------|----------|---------|-------|\n`;
+                report += `| 📝 Lines | ${coverageData.total.lines.pct || 0}% | ${coverageData.total.lines.covered || 0} | ${coverageData.total.lines.total || 0} |\n`;
+                report += `| 📋 Statements | ${coverageData.total.statements.pct || 0}% | ${coverageData.total.statements.covered || 0} | ${coverageData.total.statements.total || 0} |\n`;
+                report += `| 🔧 Functions | ${coverageData.total.functions.pct || 0}% | ${coverageData.total.functions.covered || 0} | ${coverageData.total.functions.total || 0} |\n`;
+                report += `| 🌳 Branches | ${coverageData.total.branches.pct || 0}% | ${coverageData.total.branches.covered || 0} | ${coverageData.total.branches.total || 0} |\n\n`;
+              }
+              
+              if (!backendSuccess) {
+                report += `> ℹ️ Coverage report was generated despite backend failures\n\n`;
+              }
+            } else if (backendResult !== 'skipped') {
+              report += `### ⚠️ Coverage Report\nNo coverage data available\n\n`;
+            }
+            
+            // Summary
+            const failedJobs = [];
+            if (!backendSuccess) failedJobs.push('backend');
+            if (!frontendSuccess) failedJobs.push('frontend');
+            
+            if (failedJobs.length === 0) {
+              report += `### 🎉 All checks passed!\n`;
+            } else {
+              report += `### ⚠️ Some checks failed\nFailed jobs: ${failedJobs.join(', ')}\n`;
+            }
+            
+            if (coverageAvailable) {
+              report += `\n<details>\n<summary>📁 View detailed coverage report</summary>\n\nCoverage artifacts are available in the workflow run.\n\n</details>`;
+            }
+            
+
+            
+            return report;
+          }
           
-          </details>`;
+          // Write to step summary
+          await core.summary.addRaw(generateReport()).write();
           
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: comment
-          });
+          // Generate PR comment if this is a pull request (but skip Dependabot PRs)
+          if (context.eventName === 'pull_request' && context.payload.pull_request.user.login !== 'dependabot[bot]') {
+            const comment = generateReport('## 📊 CI Results Summary');
+            
+            // Check if a comment already exists and update or create
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              comment.body.includes('## 📊 CI Results Summary') || 
+              comment.body.includes('## 📊 Test Coverage Report')
+            );
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          }

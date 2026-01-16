@@ -33,32 +33,47 @@ The database consists of the following tables:
 When you start the server for the first time, the database will be automatically initialized:
 
 ```bash
-npm run dev
+make dev
 ```
 
 This will:
+
 - Create the SQLite database file at `api/data/app.db`
 - Run all pending migrations
 - Seed the database with sample data (if empty)
 
 ### 2. Manual Database Management
 
-You can also manage the database manually:
+You can also manage the database manually from the root directory:
 
 ```bash
 # Initialize database with migrations and seed data
-npm run db:init
+make db-init
 
 # Run migrations only (no seeding)
-npm run db:migrate
+make db-migrate
 
 # Seed database only
+make db-seed
+```
+
+<% if demo_options.backend == 'nodejs' %>
+
+Alternatively, if you're in the `api/` directory, you can use npm commands directly:
+
+```bash
+cd api
+npm run db:init
+npm run db:migrate
 npm run db:seed
 ```
+
+<% endif %>
 
 ### 3. Database Location
 
 The database file is stored at:
+
 - **Development**: `api/data/app.db`
 - **Testing**: In-memory (`:memory:`)
 
@@ -119,7 +134,7 @@ Database schema changes are managed through migration files:
 
 1. Create a new migration file: `api/sql/migrations/002_description.sql`
 2. Add your SQL statements
-3. Run migrations: `npm run db:migrate`
+3. Run migrations: `make db-migrate`<% if demo_options.backend == 'nodejs' %> (or `cd api && npm run db:migrate`)<% endif %>
 
 Migration files are executed in order and tracked in the `migrations` table.
 
@@ -237,21 +252,33 @@ For production deployments, consider regular automated backups.
 
 Enable verbose SQLite logging:
 
+<% if demo_options.backend == 'nodejs' %>
+
 ```bash
-NODE_ENV=development npm run dev
+NODE_ENV=development make dev
 ```
+
+<% elsif demo_options.backend == 'python' %>
+
+```bash
+make dev
+```
+
+<% endif %>
 
 This will show all SQL queries being executed.
 
 ## Next Steps
 
 The current implementation includes:
+
 - ✅ Complete SQLite infrastructure
 - ✅ Suppliers repository and routes
 - ✅ Migration and seeding system
 - ✅ Unit tests with mocking
 
 Still to implement:
+
 - [ ] Repositories for remaining entities (products, orders, etc.)
 - [ ] Route migration for remaining endpoints
 - [ ] Integration tests

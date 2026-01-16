@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SuppliersRepository } from '../repositories/suppliersRepo';
-import { Supplier } from '../models/supplier';
+import { SuppliersRepository } from './suppliersRepo';
 import { NotFoundError } from '../utils/errors';
 
 // Mock the getDatabase function first
@@ -15,15 +14,6 @@ describe('SuppliersRepository', () => {
     let repository: SuppliersRepository;
     let mockDb: any;
     
-    const mockSupplier: Supplier = {
-        supplierId: 1,
-        name: 'Test Supplier',
-        description: 'Test Description',
-        contactPerson: 'John Doe',
-        email: 'john@test.com',
-        phone: '555-1234'
-    };
-
     beforeEach(() => {
         // Create mock database connection
         mockDb = {
@@ -44,7 +34,7 @@ describe('SuppliersRepository', () => {
     describe('findAll', () => {
         it('should return all suppliers', async () => {
             const mockResults = [
-                { supplier_id: 1, name: 'Test Supplier', description: 'Test', contact_person: 'John', email: 'john@test.com', phone: '555-1234' }
+                { supplier_id: 1, name: 'Test Supplier', description: 'Test', contact_person: 'John', email: 'john@test.com', phone: '555-1234', active: true, verified: true }
             ];
             mockDb.all.mockResolvedValue(mockResults);
 
@@ -73,7 +63,9 @@ describe('SuppliersRepository', () => {
                 description: 'Test',
                 contact_person: 'John',
                 email: 'john@test.com',
-                phone: '555-1234'
+                phone: '555-1234',
+                active: true,
+                verified: true
             };
             mockDb.get.mockResolvedValue(mockResult);
 
@@ -100,7 +92,9 @@ describe('SuppliersRepository', () => {
                 description: 'New Description',
                 contactPerson: 'Jane Doe',
                 email: 'jane@test.com',
-                phone: '555-5678'
+                phone: '555-5678',
+                active: true,
+                verified: false
             };
 
             mockDb.run.mockResolvedValue({ lastID: 2, changes: 1 });
@@ -110,14 +104,16 @@ describe('SuppliersRepository', () => {
                 description: 'New Description',
                 contact_person: 'Jane Doe',
                 email: 'jane@test.com',
-                phone: '555-5678'
+                phone: '555-5678',
+                active: true,
+                verified: false
             });
 
             const result = await repository.create(newSupplier);
 
             expect(mockDb.run).toHaveBeenCalledWith(
-                'INSERT INTO suppliers (name, description, contact_person, email, phone) VALUES (?, ?, ?, ?, ?)',
-                ['New Supplier', 'New Description', 'Jane Doe', 'jane@test.com', '555-5678']
+                'INSERT INTO suppliers (name, description, contact_person, email, phone, active, verified) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                ['New Supplier', 'New Description', 'Jane Doe', 'jane@test.com', '555-5678', true, false]
             );
             expect(result.supplierId).toBe(2);
             expect(result.name).toBe('New Supplier');
@@ -135,7 +131,9 @@ describe('SuppliersRepository', () => {
                 description: 'Test',
                 contact_person: 'John',
                 email: 'john@test.com',
-                phone: '555-1234'
+                phone: '555-1234',
+                active: true,
+                verified: true
             });
 
             const result = await repository.update(1, updateData);
@@ -194,7 +192,7 @@ describe('SuppliersRepository', () => {
     describe('findByName', () => {
         it('should return suppliers matching name pattern', async () => {
             const mockResults = [
-                { supplier_id: 1, name: 'Test Supplier', description: 'Test', contact_person: 'John', email: 'john@test.com', phone: '555-1234' }
+                { supplier_id: 1, name: 'Test Supplier', description: 'Test', contact_person: 'John', email: 'john@test.com', phone: '555-1234', active: true, verified: true }
             ];
             mockDb.all.mockResolvedValue(mockResults);
 

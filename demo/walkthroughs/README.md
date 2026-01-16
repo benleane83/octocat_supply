@@ -12,8 +12,8 @@ Comprehensive demo environment showcasing GitHub's enterprise features using a m
 
 - ✅ Zero setup - everything pre-configured
 - ✅ Docker and dependencies included
+- ✅ Automatic API endpoint detection for browser and local VS Code
 - ❌ Some Copilot MCP demos (e.g., Playwright) won't work
-- ❌ Must set API port (3000) to `public` to avoid CORS errors
 
 #### Option 2: Local Checkout
 
@@ -26,7 +26,7 @@ Comprehensive demo environment showcasing GitHub's enterprise features using a m
 
 You don't need VS Code Insiders unless demoing preview features. In Codespaces, switch via the gear icon (bottom-left) → `Switch to Insiders Version...`
 
-![Switch to Insiders](./vscode-switch-to-insiders.png)
+![Switch to Insiders](./images/vscode-switch-to-insiders.png)
 
 ## 📚 Available Walkthroughs
 

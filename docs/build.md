@@ -4,58 +4,78 @@ This guide provides instructions for building, running, and testing the OctoCAT 
 
 ## Prerequisites
 
+
+
 - Node.js (version 18 or higher)
 - npm (latest version recommended)
+
 - Docker/Podman (optional, for containerization)
-
-### Additional prerequisited for Python API
-
-- Python 3.12 (or later)
-
-### Additional prerequisited for Java API
-
- - Java 23 (or later)
- - Maven
 
 ## Installation
 
 1. Clone the repository
 2. Install dependencies:
-   ```bash
-   npm install
-   ```
+
+```bash
+make install
+```
 
 ## Building the Application
 
-### Using npm Commands
+### Using Make Commands
 
-You can build the entire application or its individual components using the following npm commands:
+You can build the entire application or its individual components using the following commands:
 
 ```bash
 # Build both API and Frontend components
-npm run build
+make build
 
 # Build only the API component
-npm run build --workspace=api
+make build-api
 
 # Build only the Frontend component
-npm run build --workspace=frontend
+make build-frontend
 ```
 
-### Database management (API workspace)
+
+
+Alternatively, if you're in the `api/` or `frontend/` directories, you can use npm commands directly:
+
+```bash
+cd api && npm run build
+cd frontend && npm run build
+```
+
+
+
+### Database management
 
 ```bash
 # Initialize DB (migrations + seed)
-npm run db:init --workspace=api
+make db-init
 
 # Run migrations only
-npm run db:migrate --workspace=api
+make db-migrate
 
 # Seed data only
-npm run db:seed --workspace=api
+make db-seed
 ```
 
+
+
+Alternatively, if you're in the `api/` directory, you can use npm commands directly:
+
+```bash
+cd api
+npm run db:init
+npm run db:migrate
+npm run db:seed
+```
+
+
+
 Environment variables:
+
 - DB_FILE: path to SQLite database file (default: `api/data/app.db`)
 - DB_ENABLE_WAL: enable WAL mode (default: true)
 - DB_FOREIGN_KEYS: enforce foreign keys (default: true)
@@ -72,25 +92,38 @@ VS Code tasks have been configured to streamline the build process:
    - `Build API`: Builds only the API component
    - `Build Frontend`: Builds only the Frontend component
 
+
 Alternatively, you can press `Ctrl+Shift+B` (or `Cmd+Shift+B` on macOS) to run the default build task (`Build All`).
+
 
 ## Running the Application
 
-### Using npm Commands
+### Using Make Commands
 
 ```bash
 # Start both API and Frontend in development mode with hot reloading
-npm run dev
+make dev
 
 # Start only the API in development mode
-npm run dev:api
+make dev-api
 
 # Start only the Frontend in development mode
-npm run dev:frontend
+make dev-frontend
 
-# Start the application in production mode (runs start:install in the API workspace)
-npm run start
+# Start the application in production mode
+make start
 ```
+
+
+
+Alternatively, if you're in the `api/` or `frontend/` directories, you can use npm commands directly:
+
+```bash
+cd api && npm run dev
+cd frontend && npm run dev
+```
+
+
 
 ### Using VS Code Debugger
 
@@ -105,19 +138,47 @@ This will start both the API and Frontend in development mode with the integrate
 ### Running Tests
 
 ```bash
-# Run all tests across all workspaces
-npm run test
+# Run all tests
+make test
 
-# Run tests for a specific workspace
-npm run test --workspace=api
+# Run API tests only
+make test-api
+
+# Run frontend tests only
+make test-frontend
 ```
+
+
+
+Alternatively, if you're in the `api/` or `frontend/` directories, you can use npm commands directly:
+
+```bash
+cd api && npm run test
+cd frontend && npm run test
+```
+
+
 
 ### Linting
 
 ```bash
-# Run linting checks on the Frontend code
-npm run lint
+# Run linting checks
+make lint
 ```
+
+
+
+Alternatively, if you're in the `api/` or `frontend/` directory, you can use npm commands directly:
+
+```bash
+cd frontend && npm run lint
+```
+
+```bash
+cd api && npm run lint
+```
+
+
 
 ## Additional Information
 

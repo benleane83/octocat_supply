@@ -22,6 +22,8 @@ const corsOrigins = process.env.API_CORS_ORIGINS
   : [
       'http://localhost:5137',
       'http://localhost:3001',
+      'http://127.0.0.1:5137',
+      'http://127.0.0.1:3001',
       // Allow all Codespace domains
       /^https:\/\/.*\.app\.github\.dev$/,
       // Allow all Azure Container Apps domains
@@ -36,7 +38,7 @@ app.use(
     origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // Allow credentials
+    credentials: true,
   }),
 );
 

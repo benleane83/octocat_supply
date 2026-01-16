@@ -1,10 +1,13 @@
 # OctoCAT Supply Chain Management System Architecture
 
+
 This site is a demo application written in TypeScript. The entire app was created originally from an [ERD diagram](../api/ERD.png) and natural language prompts using Copilot. The frontend was created in the same way, using some of the design ideas in [the design folder](./design/).
+
 
 The hero image and product images were created by prompting ChatGPT!
 
 ## Architecture Overview
+
 
 The system is a modern supply chain management application built using TypeScript, comprising a backend REST API and a React frontend. It's designed to demonstrate Copilot capabilities using a fairly typical architecture with a little complexity, but not enough to derail demos!
 
@@ -14,6 +17,7 @@ The system is a modern supply chain management application built using TypeScrip
 - Schema migrations and seed data managed via SQL files
 - Swagger/OpenAPI documentation integration
 - Entity models with proper relationships following an ERD diagram
+
 
 ### Frontend Architecture
 - React 18+ with TypeScript
@@ -39,6 +43,7 @@ erDiagram
 
 ## Component Architecture
 
+
 ```mermaid
 flowchart TD
     subgraph "Frontend"
@@ -63,6 +68,7 @@ flowchart TD
     F <--REST API--> B
 ```
 
+
 ## Key Features
 
 - Complete REST APIs for all supply chain entities
@@ -75,7 +81,9 @@ flowchart TD
 ## Persistence and Data Model
 
 - Database: SQLite (file located at `api/data/app.db` by default; configurable via `DB_FILE`)
+
 - Access: thin repository layer that maps camelCase models to snake_case columns
+
 - Migrations: SQL scripts in `api/sql/migrations` executed in order and tracked in a `migrations` table
 - Seeding: ordered SQL scripts in `api/sql/seed` to bootstrap demo data
 - Test mode: in-memory database (`:memory:`) for fast and isolated tests

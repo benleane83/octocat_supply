@@ -7,13 +7,14 @@
 - **Padawan**: If you want to use Padawan, you have to ensure that it is enabled on the repo, that Actions are enabled and that you have a branch protection rule for `main`. I recommend creating a PR required for changes to Default branch with 1 required reviewer.
 - **Local vs Codespaces:**  
   - This demo can work in a Codespace - but some scenarios (like running Playwright tests) require that you work in a local VSCode (clone the repo locally)
-  - The visibility of the API port (3000) must be set to `public`. I have set this in the port attributes of the devcontainer file, but it seems that this config setting isn't always obeyed. Check before the demo! If you forget this, you will see CORS errors when the frontend tries to reach the API.
+  - The API endpoint is automatically detected for both browser-based and local VS Code Codespaces. The API port (3000) is configured as `public` in the devcontainer and enforced in a post setup command for browser access, and the frontend dynamically constructs the correct endpoint URL.
+  - Although the API port (3000) is set to `public` automatically, it's recommended to verify the port visibility in Codespace before the demo to avoid unexpected CORS errors.
   - Make sure you **PRACTICE** this demo _before_ trying it in front of customers
   - Remember, Copilot is non-deterministic so you can't always predict exact behavior. Make sure you are comfortable with this environment so you can pivot quicky!
   - You don't have to use **VS Code Insiders** Version unless you want to demo features that you know are in preview.
     - If you want to access the Insiders Version in the web-version of a Codespace, click on the gear-icon on the bottom-left and select `Switch to Insiders Version...`
 
-  ![Switch to Insiders](./vscode-switch-to-insiders.png)
+  ![Switch to Insiders](./images/vscode-switch-to-insiders.png)
 
 ## **Building, Running and Debugging the code**
 

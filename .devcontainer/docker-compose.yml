@@ -1,9 +1,9 @@
 # Docker Compose File for Application Container with Docker bindings
-version: '3.8'
+version: "3.8"
 
 services:
   dev:
-    image: ghcr.io/octodemo/development-containers/javascript:base-202401-r1
+    image: mcr.microsoft.com/devcontainers/universal:4.1-linux
     command: sleep infinity
 
     ports:

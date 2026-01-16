@@ -16,7 +16,7 @@ export class MigrationRunner {
   private db: DatabaseConnection;
   private migrationsDir: string;
 
-  constructor(db: DatabaseConnection, migrationsDir: string = './sql/migrations') {
+  constructor(db: DatabaseConnection, migrationsDir: string = './database/migrations') {
     this.db = db;
     this.migrationsDir = path.resolve(migrationsDir);
   }
@@ -175,7 +175,7 @@ export class MigrationRunner {
  */
 export async function runMigrations(isTest: boolean = false): Promise<void> {
   const db = await getDatabase(isTest);
-  const migrationsDir = path.join(__dirname, '../../sql/migrations');
+  const migrationsDir = path.join(__dirname, '../../database/migrations');
   const runner = new MigrationRunner(db, migrationsDir);
 
   await runner.runMigrations();
