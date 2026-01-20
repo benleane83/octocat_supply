@@ -36,5 +36,10 @@
   "license": "MIT",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "playwright": "^1.57.0",
+    "pptxgenjs": "^4.0.1",
+    "sharp": "^0.34.5"
   }
 }
