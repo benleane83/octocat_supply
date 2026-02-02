@@ -7,6 +7,47 @@
 
 /**
  * @swagger
+ * /api/orders/from-cart:
+ *   post:
+ *     summary: Create an order from validated cart items
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               branchId:
+ *                 type: integer
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     productId:
+ *                       type: integer
+ *                     quantity:
+ *                       type: integer
+ *                     unitPrice:
+ *                       type: number
+ *     responses:
+ *       201:
+ *         description: Order created successfully from cart
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *                 orderDetails:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/OrderDetail'
+ *       400:
+ *         description: Invalid request
+ *
  * /api/orders:
  *   get:
  *     summary: Returns all orders
@@ -102,9 +143,65 @@
 import express from 'express';
 import { Order } from '../models/order';
 import { getOrdersRepository } from '../repositories/ordersRepo';
+import { getOrderDetailsRepository } from '../repositories/orderDetailsRepo';
 import { handleDatabaseError, NotFoundError } from '../utils/errors';
 
 const router = express.Router();
+
+interface CartItemForOrder {
+  productId: number;
+  quantity: number;
+  unitPrice: number;
+}
+
+interface CreateOrderFromCartRequest {
+  branchId: number;
+  items: CartItemForOrder[];
+}
+
+// Create order from cart
+router.post('/from-cart', async (req, res, next): Promise<void> => {
+  try {
+    const { branchId, items } = req.body as CreateOrderFromCartRequest;
+
+    if (!branchId || !items || !Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: 'Invalid request: branchId and items are required' });
+      return;
+    }
+
+    const ordersRepo = await getOrdersRepository();
+    const orderDetailsRepo = await getOrderDetailsRepository();
+
+    // Create the order
+    const newOrder = await ordersRepo.create({
+      branchId: branchId,
+      orderDate: new Date().toISOString(),
+      name: `Cart Order ${new Date().toISOString()}`,
+      description: 'Order created from shopping cart',
+      status: 'pending',
+    });
+
+    // Create order details for each cart item
+    const orderDetails = [];
+    for (const item of items) {
+      const detail = await orderDetailsRepo.create({
+        orderId: newOrder.orderId,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        notes: '',
+      });
+      orderDetails.push(detail);
+    }
+
+    res.status(201).json({
+      order: newOrder,
+      orderDetails: orderDetails,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Create a new order
 router.post('/', async (req, res, next) => {
