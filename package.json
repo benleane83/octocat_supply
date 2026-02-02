@@ -21,6 +21,7 @@
     "prettify": "prettier --cache --write \"**/*.{ts,tsx}\""
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
     "concurrently": "^6.2.1",
     "prettier": "^3.3.3"
   },
