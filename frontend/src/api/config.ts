@@ -37,6 +37,7 @@ export const api = {
     products: '/api/products',
     suppliers: '/api/suppliers',
     orders: '/api/orders',
+    checkout: '/api/orders/checkout',
     branches: '/api/branches',
     headquarters: '/api/headquarters',
     deliveries: '/api/deliveries',
