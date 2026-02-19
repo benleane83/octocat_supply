@@ -21,8 +21,10 @@ const corsOrigins = process.env.API_CORS_ORIGINS
   ? process.env.API_CORS_ORIGINS.split(',')
   : [
       'http://localhost:5137',
+      'http://localhost:5173',
       'http://localhost:3001',
       'http://127.0.0.1:5137',
+      'http://127.0.0.1:5173',
       'http://127.0.0.1:3001',
       // Allow all Codespace domains
       /^https:\/\/.*\.app\.github\.dev$/,
