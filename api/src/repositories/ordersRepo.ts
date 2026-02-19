@@ -154,6 +154,66 @@ export class OrdersRepository {
       handleDatabaseError(error);
     }
   }
+
+  /**
+   * Checkout - creates an order and its order details in a single transaction
+   */
+  async checkout(data: {
+    branchId: number;
+    name: string;
+    items: Array<{ productId: number; quantity: number; unitPrice: number }>;
+  }): Promise<{ order: Order; orderDetails: any[] }> {
+    try {
+      // Start transaction
+      await this.db.run('BEGIN');
+
+      try {
+        // Create the order
+        const orderDate = new Date().toISOString();
+        const orderResult = await this.db.run(
+          'INSERT INTO orders (branch_id, order_date, name, description, status) VALUES (?, ?, ?, ?, ?)',
+          [data.branchId, orderDate, data.name, '', 'pending'],
+        );
+
+        const orderId = orderResult.lastID!;
+
+        // Create order details
+        const orderDetails: any[] = [];
+        for (const item of data.items) {
+          const detailResult = await this.db.run(
+            'INSERT INTO order_details (order_id, product_id, quantity, unit_price, notes) VALUES (?, ?, ?, ?, ?)',
+            [orderId, item.productId, item.quantity, item.unitPrice, ''],
+          );
+
+          orderDetails.push({
+            orderDetailId: detailResult.lastID!,
+            orderId,
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            notes: '',
+          });
+        }
+
+        // Commit transaction
+        await this.db.run('COMMIT');
+
+        // Fetch the created order
+        const order = await this.findById(orderId);
+        if (!order) {
+          throw new Error('Failed to retrieve created order');
+        }
+
+        return { order, orderDetails };
+      } catch (error) {
+        // Rollback on error
+        await this.db.run('ROLLBACK');
+        throw error;
+      }
+    } catch (error) {
+      handleDatabaseError(error);
+    }
+  }
 }
 
 // Factory function to create repository instance
