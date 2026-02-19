@@ -7,6 +7,66 @@
 
 /**
  * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Create an order with items atomically (checkout)
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - branchId
+ *               - items
+ *             properties:
+ *               branchId:
+ *                 type: integer
+ *                 description: The ID of the branch placing the order
+ *               items:
+ *                 type: array
+ *                 description: Array of products to order
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - productId
+ *                     - quantity
+ *                   properties:
+ *                     productId:
+ *                       type: integer
+ *                       description: The ID of the product
+ *                     quantity:
+ *                       type: integer
+ *                       description: Quantity to order
+ *           example:
+ *             branchId: 1
+ *             items:
+ *               - productId: 1
+ *                 quantity: 2
+ *               - productId: 3
+ *                 quantity: 1
+ *     responses:
+ *       201:
+ *         description: Order created successfully with all items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *                 details:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/OrderDetail'
+ *       400:
+ *         description: Invalid request body
+ *       404:
+ *         description: Product not found
+ *       500:
+ *         description: Transaction failed, order rolled back
+ *
  * /api/orders:
  *   get:
  *     summary: Returns all orders
@@ -101,10 +161,106 @@
 
 import express from 'express';
 import { Order } from '../models/order';
+import { OrderDetail } from '../models/orderDetail';
 import { getOrdersRepository } from '../repositories/ordersRepo';
+import { getOrderDetailsRepository } from '../repositories/orderDetailsRepo';
+import { getProductsRepository } from '../repositories/productsRepo';
+import { getDatabase } from '../db/sqlite';
 import { handleDatabaseError, NotFoundError } from '../utils/errors';
 
 const router = express.Router();
+
+interface CheckoutRequest {
+  branchId: number;
+  items: Array<{ productId: number; quantity: number }>;
+}
+
+interface CheckoutResponse {
+  order: Order;
+  details: OrderDetail[];
+}
+
+// Checkout endpoint - create order with items atomically
+router.post('/checkout', async (req, res, next) => {
+  try {
+    const { branchId, items } = req.body as CheckoutRequest;
+
+    // Validate request
+    if (!branchId || !items || !Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: 'Invalid request: branchId and items array required' });
+      return;
+    }
+
+    // Generate order name and description
+    const now = new Date();
+    const orderName = `Order – ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    const orderDescription = `Order placed on ${now.toLocaleString()}`;
+    const orderDate = now.toISOString();
+
+    const db = await getDatabase();
+    const ordersRepo = await getOrdersRepository();
+    const orderDetailsRepo = await getOrderDetailsRepository();
+    const productsRepo = await getProductsRepository();
+
+    let createdOrder: Order | null = null;
+    const details: OrderDetail[] = [];
+
+    try {
+      // Start transaction
+      await db.run('BEGIN TRANSACTION');
+
+      // Create the order
+      createdOrder = await ordersRepo.create({
+        branchId,
+        orderDate,
+        name: orderName,
+        description: orderDescription,
+        status: 'pending',
+      });
+
+      // Create order details for each item
+      for (const item of items) {
+        const { productId, quantity } = item;
+
+        if (!productId || !quantity || quantity <= 0) {
+          throw new Error('Invalid item: productId and positive quantity required');
+        }
+
+        // Get product to snapshot price
+        const product = await productsRepo.findById(productId);
+        if (!product) {
+          throw new NotFoundError('Product', productId);
+        }
+
+        // Create order detail with snapshotted price
+        const orderDetail = await orderDetailsRepo.create({
+          orderId: createdOrder.orderId,
+          productId,
+          quantity,
+          unitPrice: product.price,
+          notes: '',
+        });
+
+        details.push(orderDetail);
+      }
+
+      // Commit transaction
+      await db.run('COMMIT');
+
+      res.status(201).json({ order: createdOrder, details });
+    } catch (error) {
+      // Rollback on any error
+      await db.run('ROLLBACK');
+      throw error;
+    }
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ error: error.message });
+    } else {
+      next(error);
+    }
+  }
+});
 
 // Create a new order
 router.post('/', async (req, res, next) => {
