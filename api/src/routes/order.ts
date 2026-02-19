@@ -99,6 +99,63 @@
  *         description: Order not found
  */
 
+/**
+ * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Create order with details in a single transaction
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - branchId
+ *               - name
+ *               - items
+ *             properties:
+ *               branchId:
+ *                 type: integer
+ *                 description: Branch ID placing the order
+ *               name:
+ *                 type: string
+ *                 description: Name of the order
+ *               items:
+ *                 type: array
+ *                 description: Order items
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - productId
+ *                     - quantity
+ *                     - unitPrice
+ *                   properties:
+ *                     productId:
+ *                       type: integer
+ *                     quantity:
+ *                       type: integer
+ *                     unitPrice:
+ *                       type: number
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 order:
+ *                   $ref: '#/components/schemas/Order'
+ *                 orderDetails:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/OrderDetail'
+ *       400:
+ *         description: Invalid request data
+ */
+
 import express from 'express';
 import { Order } from '../models/order';
 import { getOrdersRepository } from '../repositories/ordersRepo';
@@ -177,6 +234,51 @@ router.delete('/:id', async (req, res, next) => {
     } else {
       next(error);
     }
+  }
+});
+
+// Checkout - create order with details atomically
+router.post('/checkout', async (req, res, next) => {
+  try {
+    const { branchId, name, items } = req.body;
+
+    // Validate required fields
+    if (!branchId || typeof branchId !== 'number') {
+      res.status(400).json({ error: 'branchId is required and must be a number' });
+      return;
+    }
+
+    if (!name || typeof name !== 'string') {
+      res.status(400).json({ error: 'name is required and must be a string' });
+      return;
+    }
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ error: 'items is required and must be a non-empty array' });
+      return;
+    }
+
+    // Validate each item
+    for (const item of items) {
+      if (!item.productId || typeof item.productId !== 'number') {
+        res.status(400).json({ error: 'Each item must have a productId (number)' });
+        return;
+      }
+      if (!item.quantity || typeof item.quantity !== 'number' || item.quantity <= 0) {
+        res.status(400).json({ error: 'Each item must have a positive quantity (number)' });
+        return;
+      }
+      if (item.unitPrice === undefined || typeof item.unitPrice !== 'number' || item.unitPrice < 0) {
+        res.status(400).json({ error: 'Each item must have a non-negative unitPrice (number)' });
+        return;
+      }
+    }
+
+    const repo = await getOrdersRepository();
+    const result = await repo.checkout({ branchId, name, items });
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 });
 
