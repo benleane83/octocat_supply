@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import cors from 'cors';
@@ -10,6 +11,7 @@ import orderRoutes from './routes/order';
 import branchRoutes from './routes/branch';
 import headquartersRoutes from './routes/headquarters';
 import supplierRoutes from './routes/supplier';
+import cartRoutes from './routes/carts';
 import { initializeDatabase } from './init-db';
 import { errorHandler } from './utils/errors';
 
@@ -74,6 +76,21 @@ app.get('/api-docs.json', (req, res) => {
 
 app.use(express.json());
 
+// Configure session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'octocat-supply-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    },
+  }),
+);
+
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/order-detail-deliveries', orderDetailDeliveryRoutes);
 app.use('/api/products', productRoutes);
@@ -82,6 +99,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/headquarters', headquartersRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/carts', cartRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello, world!');
