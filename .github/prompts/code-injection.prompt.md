@@ -4,7 +4,7 @@ This prompt demonstrates how to introduce a Code injection vulnerability into th
 
 ## Overview
 
-We are going to add a new logic block that is supposed to show how a command can be exected when updating the status of a delivery. This execution will be vulnerable to exploitation, allowing an attacker to inject arbitrary code into the application.
+We are going to add a new logic block that is supposed to show how a command can be executed when updating the status of a delivery. This execution will be vulnerable to exploitation, allowing an attacker to inject arbitrary code into the application.
 
 ### New Branch
 
@@ -16,7 +16,8 @@ git checkout -b <branch_name>
 
 ### Create a Vulnerable Block
 
-Update the 
+
+Update `api/src/routes/delivery.ts`, replacing the existing `router.put('/:id/status')` method. The vulnerable code uses `exec()` from `child_process` to run a user-supplied `notifyCommand` without any sanitization:
 
 ```typescript
 // Update api/src/routes/delivery.ts, replacing the existing router.put('/:id/status') method
@@ -53,6 +54,7 @@ router.put('/:id/status', async (req, res, next) => {
   }
 });
 ```
+
 
 **This vulnerability is for educational purposes only. Never deploy code with Code injection vulnerabilities to production.**
 

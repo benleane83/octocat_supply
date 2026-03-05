@@ -108,7 +108,7 @@ There are two guaranteed vulnerabilities:
 ### Dependency Review: Licensde Violation with a AGPL-3.0 licensed package
 
 1. Search for the PR `feature: Add download of terms and services`
-2. The PR was scanned using the required workflow `Dependency Review` (see [actions.md](./actions.md) for more info on that)
+2. The PR was scanned using the required workflow `Dependency Review` (see [actions.md](../actions.md) for more info on that)
 3. The review shuld've failed, as the PR tries to add the dependency `ua-parser-js` - a library to read user-agent strings, in this case used to prevent SEO- and AI-Parser to download files to prevent DDoS. `ua-parser-js` is licensed under `AGPL-3.0`, which is specifically denied by the `Dependency Review` Workflow
 
 > [!NOTE]
@@ -126,4 +126,99 @@ There are two guaranteed vulnerabilities:
 
 ---------
 
-[^1]: To learn how to apply a patch-set, see [patch-sets.md](patch-sets.md)
+[^1]: To learn how to apply a patch-set, see [patch-sets.md](../general/patch-sets.md)
+
+## CCA uses CodeQL Tooling :copilot: 🔒
+
+The Copilot Coding Agent will now call CodeQL at the end of each coding session.
+
+### Option 1: No Findings
+
+The easiest way to demo this is to go to any agent session from Mission Control and search for CodeQL:
+
+![CodeQL step in a Copilot Coding Agent session](../images/cca-calls-codeql-no-finding.png)
+
+### Option 2: Force a finding
+
+Forcing CCA to deterministically produce a finding can be tough. The way to go about it is to ask CCA to implement a feature similar to another one that has a known vulnerability. Follow these steps:
+
+1. Navigate to Mission Control and select your demo repository (or go to your demo repository and open the agents panel).
+2. Use the following prompt to kick off a new coding session:
+
+    ```txt
+    I want to add a `/status` endpoint to `/order`. We already have a status endpoint for `/delivery` - implement it the same way.
+    ```
+
+3. CCA will take about 15 minutes, but the session will have a finding.
+    ![CodeQL finding in a Copilot Coding Agent session](../images/cca-calls-codeql-finding.png)
+
+4. Most of the time, it will **not** fix this vulnerability due to the instructions given. However, it will warn about it in its summary:
+    ![CodeQL warning about a vulnerability in a Copilot Coding Agent session](../images/cca-calls-codeql-summary.png)
+
+5. You can make that part of your demo and explain how hard it is to make CCA produce vulnerable code, with the only way being a clear instruction to do so. Highlight that, even if it ignores the findings itself, it will still warn about them in its summary—and of course, a CodeQL scan will always pick them up later in CI. You can even show this in the demo by:
+
+    1. Opening the executed status checks of the PR created by CCA directly from Mission Control.
+        ![Navigation to pull request status checks from Mission Control](../images/cca-calls-codeql-click-status-checks.png)
+    2. This should bring up the popup with a failed CodeQL Scan.
+        ![Failed CodeQL scan in pull request status checks](../images/cca-calls-codeql-status-checks.png)
+
+## Assign CodeQL Alerts to Coding Agents :copilot: 🚨
+
+### Assign from Alert Page
+
+1. Navigate to `Security` → `Code scanning alerts`.
+2. Find the alert `Database query built from user-controlled sources` and click it.
+  ![Code scanning alert for database query built from user-controlled sources](../images/ghas_codeql_alert.png)
+3. Click `Generate Autofix` (this is required before you can assign Copilot).
+  ![Interface showing the option to generate an autofix for a CodeQL alert](../images/ghas_codeql_alert_autofix.png)
+4. Assign Copilot from the list.
+  ![Assign Copilot option for a CodeQL alert](../images/ghas_codeql_alert_assign_copilot.png)
+5. Navigate to the linked PR and wait for Copilot to finish, or showcase the status directly from [Copilot Mission Control](/copilot/agents).
+  ![Navigation to pull request linked to a CodeQL alert autofix](../images/ghas-codeql-navigate-pr.png)
+6. You can repeat the process for the `Code injection` vulnerability as well if you want to showcase multiple assignments.
+
+> [!TIP]
+> Copilot can only be assigned to alerts for which the autofix has already been generated. Do this before your demo to save time.
+
+### (Bulk) Assign from Campaign (not natively supported)
+
+> [!WARNING]
+> We currently don't have a campaign created with the demo due to the 10-campaign limit. To show this feature, you will either have to create your own temporary campaign or work with an existing one from someone else. We are working on a deeper-dive GHAS Demo that will spin up your own org with a pre-created security campaign for you, but we won't have that done until after Universe.
+
+> [!IMPORTANT]
+> If you create your own campaign, make sure to delete it right after your demo to not stop anyone else from following this demo.
+
+1. Create a security campaign `From Code Scanning Filters` ([follow the docs here if you don't know how](https://docs.github.com/en/enterprise-cloud@latest/code-security/securing-your-organization/fixing-security-alerts-at-scale/creating-managing-security-campaigns?versionId=enterprise-cloud%40latest#create-a-campaign)) with the following data:
+2. Add a `Repository` filter and use your demo repository as the value.
+  ![Creating a repository filter for a security campaign](../images/ghas_campaign_create_filter.png)
+3. Click `Save as` → `Published campaign` and make sure to list yourself as the `Campaign Manager` before publishing.
+  ![Confirmation of campaign filter creation and campaign manager assignment](../images/ghas_campaign_filter_created.png)
+4. In the campaign view, click on your repository to navigate to the repository's campaign page.
+  ![Navigating to the repository's campaign page](../images/ghas_campaign_navigate_repo.png)
+5. You might have to wait a few seconds until the alerts have autofixes generated, as you can't assign Copilot before that happens. Navigate to an included alert to check the status.
+6. Now you can bulk-assign Copilot to alerts with generated autofixes (`Code injection` and `Workflow does not contain permissions` generally work) by clicking `Assign` → `Copilot` in the top-right.
+  ![Bulk assign Copilot option in a security campaign](../images/ghas_campaign_bulk_assign_copilot.png)
+7. Navigate to the repo's PRs or to the Copilot Mission Control Center to view the progress.
+
+## Secret Scanning with Additional Metadata 🔒 🤫
+
+> [!WARNING]
+> This feature does not have an API yet and requires manual setup in the repository. You can make this part of the demo or activate it beforehand. To activate it before, navigate to the `Settings` tab of your demo repository, go to the `Advanced Security` tab, scroll to the `Secret scanning extended metadata` section, and enable it.
+
+1. Navigate to the `Security` tab of your demo repository.
+2. Click `Secret scanning -> Default`. You should see a leaked `Slack API Token`. Click it.
+    ![Secret Alert Page, showing leaked Slack API Token](../images/ghas-secret-scanning-extended-metadata-alerts.png)
+3. Explain how just knowing the secret is sometimes not enough to judge its criticality or to immediately know how to rotate/revoke it due to missing metadata.
+4. On the top right, click `Verify Secret`.
+    ![Secret Alert Page, showing Verify Secret button](../images/ghas-secret-scanning-extended-metadata-verify.png)
+5. After the verification, you should see a `Slack API Token (Preview)` with an `Other metadata: Enable in settings` link on the right-hand side. Click it.
+
+    ![Secret Alert Page, showing Other metadata link](../images/ghas-secret-scanning-extended-metadata-enable.png)
+
+6. Scroll to the `Secret scanning` section and enable `Extended metadata`.
+
+    ![Secret Scanning Settings page, showing Extended metadata option](../images/ghas-secret-scanning-extended-metadata.png)
+
+7. Navigate back to the secret alert from step 2. You should now see additional metadata about the leaked secret, its validity, `Org name`, and `Owner name`.
+
+    ![Secret Alert Page, showing extended metadata for the leaked Slack API Token](../images/ghas-secret-scanning-extended-metadata-data.png)

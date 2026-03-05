@@ -6,10 +6,12 @@ BACKEND ?= $(shell \
 	if [ -d "api" ]; then \
 		if [ -f "api/package.json" ]; then echo "nodejs"; \
 		elif [ -f "api/pyproject.toml" ]; then echo "python"; \
+		elif [ -f "api/pom.xml" ]; then echo "java"; \
 		else echo "unknown"; fi \
-	elif [ -d "api-nodejs" ] && [ -d "api-python" ]; then echo "nodejs"; \
+	elif [ -d "api-nodejs" ] && [ -d "api-python" ] && [ -d "api-java" ]; then echo "nodejs"; \
 	elif [ -d "api-nodejs" ]; then echo "nodejs"; \
 	elif [ -d "api-python" ]; then echo "python"; \
+	elif [ -d "api-java" ]; then echo "java"; \
 	else echo "unknown"; fi \
 )
 
@@ -45,7 +47,10 @@ ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm install
 	cd $(FRONTEND_DIR) && npm install
 else ifeq ($(BACKEND),python)
-	cd $(API_DIR) && pip install -e ".[dev]"
+	cd $(API_DIR) && $(MAKE) install
+	cd $(FRONTEND_DIR) && npm install
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && $(MAKE) install
 	cd $(FRONTEND_DIR) && npm install
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -58,13 +63,18 @@ endif
 dev: ## Start development servers (API + Frontend)
 	@echo "Starting development environment with $(BACKEND) backend..."
 ifeq ($(BACKEND),nodejs)
-	@cd $(API_DIR)
 	@trap 'kill 0' INT; \
 	(cd $(API_DIR) && npm run dev) & \
 	(cd $(FRONTEND_DIR) && VITE_API_URL=http://localhost:3000 npm run dev) & \
 	wait
 else ifeq ($(BACKEND),python)
 	@$(MAKE) -C $(API_DIR) db-seed
+	@trap 'kill 0' INT; \
+	(cd $(API_DIR) && $(MAKE) dev) & \
+	(cd $(FRONTEND_DIR) && VITE_API_URL=http://localhost:3000 npm run dev) & \
+	wait
+else ifeq ($(BACKEND),java)
+	$(MAKE) build
 	@trap 'kill 0' INT; \
 	(cd $(API_DIR) && $(MAKE) dev) & \
 	(cd $(FRONTEND_DIR) && VITE_API_URL=http://localhost:3000 npm run dev) & \
@@ -80,6 +90,8 @@ dev-api: ## Start only the API development server
 ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run dev
 else ifeq ($(BACKEND),python)
+	cd $(API_DIR) && $(MAKE) dev
+else ifeq ($(BACKEND),java)
 	cd $(API_DIR) && $(MAKE) dev
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -100,6 +112,8 @@ ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run db:init
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) db-init
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && $(MAKE) db-init
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -111,6 +125,8 @@ db-seed: ## Initialize and seed database with sample data
 ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run db:seed
 else ifeq ($(BACKEND),python)
+	cd $(API_DIR) && $(MAKE) db-seed
+else ifeq ($(BACKEND),java)
 	cd $(API_DIR) && $(MAKE) db-seed
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -128,6 +144,9 @@ ifeq ($(BACKEND),nodejs)
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) build
 	cd $(FRONTEND_DIR) && npm run build
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && $(MAKE) build
+	cd $(FRONTEND_DIR) && npm run build
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -139,6 +158,8 @@ build-api: ## Build only the API
 ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run build
 else ifeq ($(BACKEND),python)
+	cd $(API_DIR) && $(MAKE) build
+else ifeq ($(BACKEND),java)
 	cd $(API_DIR) && $(MAKE) build
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -161,6 +182,9 @@ ifeq ($(BACKEND),nodejs)
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) test
 	cd $(FRONTEND_DIR) && npm run test
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && $(MAKE) test
+	cd $(FRONTEND_DIR) && npm run test
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -172,6 +196,8 @@ test-api: ## Run API tests
 ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run test
 else ifeq ($(BACKEND),python)
+	cd $(API_DIR) && $(MAKE) test
+else ifeq ($(BACKEND),java)
 	cd $(API_DIR) && $(MAKE) test
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -195,6 +221,8 @@ ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm run test:coverage
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) test-coverage
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && $(MAKE) test
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -211,6 +239,9 @@ ifeq ($(BACKEND),nodejs)
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) lint
 	cd $(FRONTEND_DIR) && npm run lint
+else ifeq ($(BACKEND),java)
+	@echo "Java linting via Maven checkstyle (run during test phase)"
+	cd $(FRONTEND_DIR) && npm run lint
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -225,6 +256,9 @@ ifeq ($(BACKEND),nodejs)
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) lint-fix
 	cd $(FRONTEND_DIR) && npm run lint -- --fix
+else ifeq ($(BACKEND),java)
+	@echo "Java linting via Maven (run during test phase)"
+	cd $(FRONTEND_DIR) && npm run lint -- --fix
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -237,6 +271,9 @@ ifeq ($(BACKEND),nodejs)
 	npx prettier --write "$(API_DIR)/**/*.{ts,tsx}" "$(FRONTEND_DIR)/**/*.{ts,tsx}"
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) format
+	cd $(FRONTEND_DIR) && npx prettier --write "src/**/*.{ts,tsx}"
+else ifeq ($(BACKEND),java)
+	@echo "Java formatting via Maven plugins (configured in pom.xml)"
 	cd $(FRONTEND_DIR) && npx prettier --write "src/**/*.{ts,tsx}"
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
@@ -252,6 +289,8 @@ ifeq ($(BACKEND),nodejs)
 	cd $(API_DIR) && npm start
 else ifeq ($(BACKEND),python)
 	cd $(API_DIR) && $(MAKE) start
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && ./mvnw spring-boot:run
 else
 	@echo "Error: Unknown backend '$(BACKEND)'"
 	@exit 1
@@ -286,8 +325,11 @@ else ifeq ($(BACKEND),python)
 	rm -rf $(API_DIR)/.venv $(API_DIR)/__pycache__ $(API_DIR)/src/__pycache__
 	rm -rf $(API_DIR)/.pytest_cache $(API_DIR)/htmlcov $(API_DIR)/.coverage
 	rm -rf $(FRONTEND_DIR)/node_modules $(FRONTEND_DIR)/dist
+else ifeq ($(BACKEND),java)
+	cd $(API_DIR) && ./mvnw clean
+	rm -rf $(FRONTEND_DIR)/node_modules $(FRONTEND_DIR)/dist
 else
 	@echo "Cleaning common artifacts..."
-	rm -rf */node_modules */dist */__pycache__ */.venv
+	rm -rf */node_modules */dist */__pycache__ */.venv */target
 endif
 	rm -rf $(API_DIR)/*.db $(API_DIR)/*.db-*

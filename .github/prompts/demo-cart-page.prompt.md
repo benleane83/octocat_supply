@@ -1,7 +1,6 @@
 ---
-mode: 'agent'
 description: 'Complete Demo: Add Cart Page and Icon with Vision and Agent Mode'
-tools: ['changes', 'codebase', 'editFiles', 'fetch', 'findTestFiles', 'githubRepo', 'openSimpleBrowser', 'problems', 'runCommands', 'runTasks', 'search', 'terminalLastCommand', 'testFailure', 'usages', 'playwright', 'github']
+tools: ['search', 'edit', 'web','vscode/openSimpleBrowser', 'read', 'execute', 'azure-mcp-server/search', 'playwright/*', 'github/*']
 ---
 
 # Demo: Cart Page and Icon Implementation

@@ -187,9 +187,11 @@ Research priorities:
    - What HTTP status codes map to each error?
 
 5. **Type Safety**:
+
    - TypeScript interfaces needed
    - Type imports from models
    - Generic types for repositories
+
 
 Gather enough context to write implementation that matches codebase idioms.
 </context_engineering>

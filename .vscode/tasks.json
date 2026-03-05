@@ -3,10 +3,10 @@
   "tasks": [
     {
       "label": "Build All",
+      "type": "shell",
       "dependsOrder": "sequence",
-      "command": "npm",
+      "command": "make",
       "args": [
-        "run",
         "build"
       ],
       "options": {
@@ -20,11 +20,9 @@
     {
       "label": "Build API",
       "type": "shell",
-      "command": "npm",
+      "command": "make",
       "args": [
-        "run",
-        "build",
-        "--workspace=api"
+        "build-api"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -40,11 +38,9 @@
     {
       "label": "Build Frontend",
       "type": "shell",
-      "command": "npm",
+      "command": "make",
       "args": [
-        "run",
-        "build",
-        "--workspace=frontend"
+        "build-frontend"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

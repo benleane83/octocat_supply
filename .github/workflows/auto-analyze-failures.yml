@@ -1,9 +1,10 @@
 name: Auto Analyze Build Failures
 
 on:
-  workflow_run:
-    workflows: ["*"]
-    types: [completed]
+  # workflow_run:
+  #   workflows: ["*"]
+  #   types: [completed]
+  workflow_dispatch:
 
 permissions:
   contents: read

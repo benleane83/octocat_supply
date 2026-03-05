@@ -169,3 +169,6 @@ output apiAppName string = apiContainerApp.name
 
 @description('Frontend Container App Name')
 output frontendAppName string = frontendContainerApp.name
+
+@description('Deployment location')
+output location string = location

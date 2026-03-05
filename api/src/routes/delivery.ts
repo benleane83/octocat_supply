@@ -147,9 +147,19 @@
 
 import express from 'express';
 import { Delivery } from '../models/delivery';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+import rateLimit from 'express-rate-limit';
 import { getDeliveriesRepository } from '../repositories/deliveriesRepo';
 import { NotFoundError } from '../utils/errors';
+
+// Rate limiter for the status update endpoint that executes a system command
+const statusUpdateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit each IP to 20 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+});
 
 
 const router = express.Router();
@@ -192,7 +202,7 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // Update the status of a delivery
-router.put('/:id/status', async (req, res, next) => {
+router.put('/:id/status', statusUpdateLimiter, async (req, res, next) => {
   try {
     const { status, deliveryPartner } = req.body;
     const repo = await getDeliveriesRepository();
@@ -202,7 +212,9 @@ router.put('/:id/status', async (req, res, next) => {
       const updatedDelivery = await repo.updateStatus(parseInt(req.params.id), status);
 
       if (deliveryPartner) {
-        exec(`notify ${deliveryPartner}`, (error, stdout) => {
+        // Use execFile to avoid shell injection: deliveryPartner is passed as a
+        // discrete argument rather than interpolated into a shell command string.
+        execFile('notify', [deliveryPartner], (error, stdout) => {
           if (error) {
             console.error(`Error executing command: ${error}`);
             return res.status(500).json({ error: error.message });

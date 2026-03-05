@@ -1,7 +1,6 @@
 ---
-mode: 'agent'
 description: 'Check DRY'
-tools: ['changes', 'codebase', 'fetch', 'findTestFiles', 'githubRepo', 'problems', 'runCommands', 'runTasks', 'runTests', 'search', 'searchResults', 'testFailure', 'usages', 'playwright', 'github', 'github-remote', 'Azure MCP Server']
+tools: ['search', 'web/fetch', 'web/githubRepo','read', 'execute', 'azure-mcp-server/search', 'playwright/*', 'github-remote/*']
 ---
 
 # 🔍 DRY Violation Analysis & Refactoring Recommendations

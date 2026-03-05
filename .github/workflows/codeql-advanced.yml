@@ -10,6 +10,12 @@ on:
   ## Allow on demand scan
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: read
+  actions: read
+
 jobs:
   build:
     name: CodeQL Code Scanning

@@ -48,6 +48,8 @@ cd frontend && npm run build
 
 
 
+
+
 ### Database management
 
 ```bash
@@ -71,6 +73,8 @@ npm run db:init
 npm run db:migrate
 npm run db:seed
 ```
+
+
 
 
 
@@ -125,6 +129,8 @@ cd frontend && npm run dev
 
 
 
+
+
 ### Using VS Code Debugger
 
 1. Open the Debug panel (`Ctrl+Shift+D` or `Cmd+Shift+D` on macOS)
@@ -159,6 +165,8 @@ cd frontend && npm run test
 
 
 
+
+
 ### Linting
 
 ```bash
@@ -177,6 +185,8 @@ cd frontend && npm run lint
 ```bash
 cd api && npm run lint
 ```
+
+
 
 
 

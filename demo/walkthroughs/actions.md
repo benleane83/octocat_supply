@@ -75,3 +75,52 @@ You can demonstrate how required workflows can be used to enforce generalized ch
     3. Navigate to the custom action's source: [.github/actions/verify-container-attestations/action.yml](../../.github/actions/verify-container-attestations/action.yml).
     4. The `GH_COMMAND` environment variable contains the `gh attestation verify` commands for both SLSA and SBOM checks.
     5. This action also generates a helpful job summary, which you can display by navigating to a successful workflow run.
+
+## Virtual Registry, aka Linked Artifacts
+
+**What to show:** Using GitHub's Virtual Registry to associate the production context of artifacts directly with repositories and GHAS alerts.
+
+**Why:** Application security managers are often overwhelmed by a high volume of alerts, many of which may not represent a real risk because the affected code never makes it to production. By associating production context with alerts in GitHub's Virtual Registry, alerts can be prioritized based on actual deployment status, reducing noise and focusing attention on critical issues.
+
+**How:**
+
+> [!IMPORTANT]
+> This demo requires you to use the demo option `Requires Azure Deployment` set to `Yes`!
+
+1. After repository creation, wait for the deployment action to complete.
+2. Navigate to the [organization's Linked artifacts page](https://github.com/orgs/msft-common-demos/artifacts).
+
+    ![Screenshot showing the Linked Artifacts page in a GitHub organization](./images/linked-artifacts-overview.png)
+
+3. In the linked artifacts, search for the `api` artifact of your repository:
+
+    ```txt
+    msft-common-demos/-api
+    ```
+
+4. Explain all the different information you see on this screen:
+    ![Screenshot showing the details page of Linked Artifacts](./images/linked-artifacts-details.png)
+    1. **Source Repository:** This links this metadata record to the actual source repository. In the demo's case, this is automatically done through the provenance attestation created during the build process (see the [Artifact Attestations](#artifact-attestations) section above).
+    2. **Attestations:** A list of all associated attestations is also provided at the bottom of the page.
+    3. **Storage Record:** This links the artifact itself to this metadata record.
+    4. **Deployments:** This is the main piece. Here, metadata about the deployment of the artifact in production can be added, such as the cluster name, risk metadata (like `internet-exposed`), physical location, etc.
+
+5. Go to the `Organization's Security Page` -> `Alerts (Section Header)` -> `Code Scanning`.
+6. Apply the two filters `runtime-risk:internet-exposed` and `severity:high` (optionally, if there are too many results in your demo organization, add a filter for the repository name `repo:msft-common-demos/`).
+7. You should see the alert `SQL query built from user-controlled sources` in the list. Explain how the previously seen artifact metadata allowed for a better prioritization of this alert, thanks to the `internet-exposed` runtime risk.
+    1. (optional): Use this direct link to the filtered view: <https://github.com/orgs/msft-common-demos/security/alerts/code-scanning?query=is%3Aclosed+runtime-risk%3Ainternet-exposed+severity%3Ahigh++repo%3A>
+8. Explain how this filter could also be used to create a focused security campaign for all internet-exposed SQL-Injection alerts.
+
+> [!TIP]
+> The **sha256-digest** of the artifact is what connects all of these resources, that is the provenance attestation, the storage recrod and the deployment record, together and allows us to show easily navigate through them.
+
+### (optional) Show the creation of the Records in the Deployment Workflow
+
+1. Navigate back to the repository and to the workflow file: [.github/workflows/deploy.yml](../../.github/workflows/deploy.yml).
+2. The job `update-virtual-registry` has four steps. Show the two for the API deployment:
+    1. **Create API Storage Record**
+    2. **Create API Deployment Record**
+3. Explain how both steps use a single, simple `gh cli` command to create the records in the Virtual Registry.
+
+> [!TIP]
+> External tools like Azure Defender for Cloud or Artifactory create these records automatically already today, but under the hood, they use the same REST API the `gh` CLI calls above are using.

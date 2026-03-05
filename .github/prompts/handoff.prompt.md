@@ -1,7 +1,6 @@
 ---
-mode: 'agent'
 description: 'Scans the current chat history, strips noise, and writes a concise handoff.md for the next developer.'
-tools: ['file_search', 'read_file', 'insert_edit_into_file', 'create_file']
+tools: ['search', 'web/githubRepo', 'read', 'azure-mcp-server/search', 'github/*', 'github-remote/*']
 ---
 
 <!--
