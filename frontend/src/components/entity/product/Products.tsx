@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useQuery } from 'react-query';
 import { api } from '../../../api/config';
 import { useTheme } from '../../../context/ThemeContext';
+import { useCart } from '../../../context/CartContext';
 
 interface Product {
   productId: number;
@@ -26,8 +27,10 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [addedProductId, setAddedProductId] = useState<number | null>(null);
   const { data: products, isLoading, error } = useQuery('products', fetchProducts);
   const { darkMode } = useTheme();
+  const { addItem } = useCart();
 
   const filteredProducts = products?.filter(
     (product) =>
@@ -52,12 +55,25 @@ export default function Products() {
   const handleAddToCart = (productId: number) => {
     const quantity = quantities[productId] || 0;
     if (quantity > 0) {
-      // TODO: Implement cart functionality
-      alert(`Added ${quantity} items to cart`);
-      setQuantities((prev) => ({
-        ...prev,
-        [productId]: 0,
-      }));
+      const product = products?.find((p) => p.productId === productId);
+      if (product) {
+        addItem(
+          {
+            productId: product.productId,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            discount: product.discount,
+            imgName: product.imgName,
+            sku: product.sku,
+            unit: product.unit,
+          },
+          quantity,
+        );
+        setQuantities((prev) => ({ ...prev, [productId]: 0 }));
+        setAddedProductId(productId);
+        setTimeout(() => setAddedProductId(null), 2000);
+      }
     }
   };
 
@@ -248,6 +264,11 @@ export default function Products() {
                         Add to Cart
                       </button>
                     </div>
+                    {addedProductId === product.productId && (
+                      <p className="text-green-500 text-sm text-center" role="status">
+                        ✓ Added to cart
+                      </p>
+                    )}
                   </div>
                 </div>
                 </div>

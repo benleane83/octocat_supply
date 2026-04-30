@@ -7,6 +7,28 @@
 
 /**
  * @swagger
+ * /api/orders/checkout:
+ *   post:
+ *     summary: Place a guest cart order (transactional checkout)
+ *     tags: [Orders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CheckoutRequest'
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CheckoutResponse'
+ *       400:
+ *         description: Validation error (empty cart, invalid quantity, etc.)
+ *       404:
+ *         description: Branch or product not found
+ *
  * /api/orders:
  *   get:
  *     summary: Returns all orders
@@ -101,10 +123,22 @@
 
 import express from 'express';
 import { Order } from '../models/order';
+import { CheckoutRequest } from '../models/orderCheckout';
 import { getOrdersRepository } from '../repositories/ordersRepo';
 import { handleDatabaseError, NotFoundError } from '../utils/errors';
 
 const router = express.Router();
+
+// POST /checkout — must be before /:id routes
+router.post('/checkout', async (req, res, next) => {
+  try {
+    const repo = await getOrdersRepository();
+    const result = await repo.createFromCheckout(req.body as CheckoutRequest);
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Create a new order
 router.post('/', async (req, res, next) => {
