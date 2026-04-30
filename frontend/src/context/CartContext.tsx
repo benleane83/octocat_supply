@@ -1,4 +1,3 @@
-// eslint-disable-next-line react-refresh/only-export-components
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface CartItem {

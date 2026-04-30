@@ -195,10 +195,11 @@ export class OrdersRepository {
       productIds,
     );
 
-    type ProductRow = { product_id: number; price: number; discount: number | null };
+    type ProductRow = { productId: number; price: number; discount: number | null };
     const productMap = new Map<number, ProductRow>();
-    for (const row of productRows as ProductRow[]) {
-      productMap.set(row.product_id, row);
+    for (const row of productRows) {
+      const r = objectToCamelCase<ProductRow>(row);
+      productMap.set(r.productId, r);
     }
 
     // Verify all requested products exist
