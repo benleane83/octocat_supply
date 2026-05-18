@@ -48,3 +48,4 @@ api/data/
 tmp
 
 .agent.log
+/logs

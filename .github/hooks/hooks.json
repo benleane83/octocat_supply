@@ -1,7 +1,7 @@
 {
   "version": 1,
   "hooks": {
-    "sessionStart": [
+    "SessionStart": [
       {
         "type": "command",
         "bash": "echo \"[$(date)] Session started\" >> .agent.log",
@@ -26,14 +26,69 @@
         "powershell": "Add-Content -Path .agent.log -Value \"[$(Get-Date)] Session stopped\"",
         "cwd": ".",
         "timeoutSec": 10
-      },
-      // comment this in if you want automatic commits after each agent session
-      // {
-      //   "type": "command",
-      //   "bash": ".github/hooks/checkpoint-commit.sh",
-      //   "cwd": ".",
-      //   "timeoutSec": 10
-      // }
+      }
     ]
+    // "SessionStart": [
+    //   {
+    //     "type": "command",
+    //     "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-start.ps1",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-start.ps1",
+    //     "cwd": ".",
+    //     "timeout": 5,
+    //     "timeoutSec": 5
+    //   }
+    // ],
+    // "UserPromptSubmit": [
+    //   {
+    //     "type": "command",
+    //     "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-prompt.ps1",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-prompt.ps1",
+    //     "cwd": ".",
+    //     "env": {
+    //       "GOVERNANCE_LEVEL": "standard",
+    //       "BLOCK_ON_THREAT": "true"
+    //     },
+    //     "timeout": 10,
+    //     "timeoutSec": 10
+    //   }
+    // ],
+    // "PreToolUse": [
+    //   {
+    //     "type": "command",
+    //     "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-pre-tool-use.ps1",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-pre-tool-use.ps1",
+    //     "cwd": ".",
+    //     "timeout": 5,
+    //     "timeoutSec": 5
+    //   }
+    // ],
+    // "permissionRequest": [
+    //   {
+    //     "type": "command",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-permission-request.ps1",
+    //     "cwd": ".",
+    //     "timeoutSec": 5
+    //   }
+    // ],
+    // "Stop": [
+    //   {
+    //     "type": "command",
+    //     "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-end.ps1",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-end.ps1",
+    //     "cwd": ".",
+    //     "timeout": 5,
+    //     "timeoutSec": 5
+    //   }
+    // ],
+    // "SessionEnd": [
+    //   {
+    //     "type": "command",
+    //     "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-end.ps1",
+    //     "powershell": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/hooks/governance-audit/audit-session-end.ps1",
+    //     "cwd": ".",
+    //     "timeout": 5,
+    //     "timeoutSec": 5
+    //   }
+    // ]
   }
 }
